@@ -4,3 +4,5 @@ for implementing an OAuth 2.0 compliant system as specified by RFC 6749.
 */
 
 #![experimental]
+
+pub mod syntax;
