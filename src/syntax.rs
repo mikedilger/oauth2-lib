@@ -1,7 +1,5 @@
 //! Syntax validation for OAuth 2.0 elements
 
-#![experimental]
-
 pub fn valid_client_id_str<'a>(client_id: &'a str) -> bool {
     str_is_vschar(client_id)
 }
