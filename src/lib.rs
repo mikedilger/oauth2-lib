@@ -51,3 +51,6 @@ apply:
 #![experimental]
 
 pub mod syntax;
+pub mod resource_server;
+pub mod authorization_server;
+pub mod client;
