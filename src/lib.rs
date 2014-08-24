@@ -24,11 +24,20 @@ OAuth 2.0 is an Authorization Framework.  In order to get something usable, you 
 the missing pieces.  And there are quite a few missing pieces which you will need to implement
 in order to get a working system.  These include:
 
-    * Initial client registration (between the Client and the Authorization Server)
-    * Client authentication (by the Authorization Server)
-    * User-Agent session management (by the Client)
-    * User-Agent authentication and authorization (by the Authorization Server)
-    * And perhaps more (FIXME)
+<ul>
+<li>Issuing and receiving HTTP requests (e.g. you'll need to plug in some HTTP
+    library, we won't pick one for you).</li>
+<li>Storing state.  Often database tables are used.  Manytimes the Authorization
+    Server and Resource Server use the same database, or perhaps are the same
+    server.  This is out of scope, and left up to you.</li>
+<li>Initial client registration (between the Client and the Authorization
+    Server).  Often people just use config files, but this is for you to decide.</li>
+<li>Client authentication (by the Authorization Server)</li>
+<li>User-Agent session management (by the Client).  Usually via a session cookie,
+    but we leave this up to you.</li>
+<li>User-Agent authentication and authorization (by the Authorization Server)</li>
+<li>Perhaps more</li>
+</ul>
 
 <h2>Sample Implementation</h2>
 
@@ -41,11 +50,13 @@ We do not (and likely will not) support every standard compliant way to use OAut
 But we do try to be as flexible as possible.  That being said, the following limitations
 apply:
 
-    * All HTTP traffic is required to be TLS protected.  All endpoints must use the
-      <em>https</em> scheme.  The standard only requires this of most traffic.
-    * All IDs and tokens are taken to be respresented in UTF-8 encodings.  We will not
-      work with other encodings.  The standard is silent on most encoding issues.
-    * FIXME: More limitations will be added to this list as the development progresses.
+<ul>
+<li>All HTTP traffic is required to be TLS protected.  All endpoints must use the
+    <em>https</em> scheme.  The standard only requires this of most traffic.</li>
+<li>All IDs and tokens are taken to be respresented in UTF-8 encodings.  We will not
+    work with other encodings.  The standard is silent on most encoding issues.</li>
+<li>FIXME: More limitations will be added to this list as the development progresses.</li>
+</ul>
 */
 
 #![experimental]
