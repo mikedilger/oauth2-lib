@@ -61,7 +61,47 @@ apply:
 
 #![experimental]
 
+extern crate url;
+
+use std::fmt;
+use std::fmt::Show;
+
 pub mod syntax;
 pub mod resource_server;
 pub mod authorization_server;
 pub mod client;
+
+/// Client Identifier, issued to Clients by Authorization Servers when registering
+///
+/// See RFC 6749 Section 2.2.   In particular:
+/// <ul>
+/// <li>The authorization server issues this to the client at registration, and uses it
+///     to look up details about the client during the main protocol.</li>
+/// <li>It is not a secret.</li>
+/// </ul>
+//
+/// Charset validator ```syntax::valid_client_id_str```
+pub type ClientId = String;
+
+
+/// Client Type, either 'confidential' or 'public'.
+///
+/// See RFC 6749 Section 2.2.   In particular:
+/// <ul>
+/// <li>If the client cannot be trusted with secrets, it is 'public'.  This usually includes
+///     all clients in end-user hands like javascript ones, but strictly speaking it depends
+///     on your security model.</li>
+/// </ul>
+pub enum ClientType {
+    ConfidentialClient,
+    PublicClient,
+}
+impl Show for ClientType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
+    {
+        match *self {
+            ConfidentialClient => write!(f, "confidential"),
+            PublicClient => write!(f, "public"),
+        }
+    }
+}
