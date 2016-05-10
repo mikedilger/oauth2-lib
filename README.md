@@ -4,7 +4,7 @@
 
 This is an OAuth 2.0 library for the Rust language.  It defines types and
 traits useful for implementing an OAuth 2.0 compliant system as specified by
-RFC 6749.
+<a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
 
 WARNING: We've just started.  It is practically useless at this point.
 
