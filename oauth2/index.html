@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `oauth2` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, oauth2">
+
+    <title>oauth2 - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'oauth2', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>oauth2</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/oauth2/src/lib.rs.html#1-105' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>This is an OAuth 2.0 library for the Rust language.  It defines types and traits useful
+for implementing an OAuth 2.0 compliant system as specified by RFC 6749.</p>
+
+<p>WARNING: We&#39;ve just started.  It is practically useless at this point.</p>
+
+<h2>Applicability</h2>
+
+<p>OAuth 2.0 is a protocol framework that allows an application (the <em>Client</em>, usually a web
+site) to obtain limited access to an HTTP service (the <em>Resource Server</em>) on behalf of
+a <em>Resource Owner</em> which interacts with the Client via a <em>User-Agent</em> (browser).
+This is mediated via an <em>Authorization Server</em> (which could be the Resource Server
+itself, or separated from it).</p>
+
+<blockquote>
+The term "client" can be confusing here.  The client of the OAuth service is typically a
+web site.   The client of that web site is the user-agent (browser).  To minimize
+confusion, the user-agent will not be referred to as a client.
+</blockquote>
+
+<h2>OAuth is a Framework Only</h2>
+
+<p>OAuth 2.0 is an Authorization Framework.  In order to get something usable, you must supply
+the missing pieces.  And there are quite a few missing pieces which you will need to implement
+in order to get a working system.  These include:</p>
+
+<ul>
+<li>Issuing and receiving HTTP requests (e.g. you'll need to work with HTTP somehow,
+    perhaps with hyper or other HTTP related library, or directly).</li>
+<li>Storing state.  Often database tables are used.  Manytimes the Authorization
+    Server and Resource Server use the same database, or perhaps are the same
+    server.  This is out of scope, and left up to you.</li>
+<li>Initial client registration (between the Client and the Authorization
+    Server).  Often people just use config files, but this is for you to decide.</li>
+<li>Client authentication (by the Authorization Server)</li>
+<li>User-Agent session management (by the Client).  Usually via a session cookie,
+    but we leave this up to you.</li>
+<li>User-Agent authentication and authorization (by the Authorization Server)</li>
+<li>Perhaps more</li>
+</ul>
+
+<h2>Sample Implementation</h2>
+
+<p>FIXME: A sample implementation is intended to be supplied to demonstrate how to use this
+library.</p>
+
+<h2>Coverage and Standard Support</h2>
+
+<p>We do not (and likely will not) support every standard compliant way to use OAuth 2.0.
+But we do try to be as flexible as possible.  That being said, the following limitations
+apply:</p>
+
+<ul>
+<li>All HTTP traffic is required to be TLS protected.  All endpoints must use the
+    <em>https</em> scheme.  The standard only requires this of most traffic.</li>
+<li>All IDs and tokens are taken to be respresented in UTF-8 encodings.  We will not
+    work with other encodings.  The standard is silent on most encoding issues.</li>
+<li>FIXME: More limitations will be added to this list as the development progresses.</li>
+</ul>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='authorization_server/index.html'
+                                  title='oauth2::authorization_server'>authorization_server</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='client/index.html'
+                                  title='oauth2::client'>client</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='resource_server/index.html'
+                                  title='oauth2::resource_server'>resource_server</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='syntax/index.html'
+                                  title='oauth2::syntax'>syntax</a></td>
+                           <td class='docblock short'>
+                                <p>Syntax validation for OAuth 2.0 elements</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.ClientType.html'
+                                  title='oauth2::ClientType'>ClientType</a></td>
+                           <td class='docblock short'>
+                                <p>Client Type, either &#39;confidential&#39; or &#39;public&#39;.</p>
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.ClientId.html'
+                                  title='oauth2::ClientId'>ClientId</a></td>
+                           <td class='docblock short'>
+                                <p>Client Identifier, issued to Clients by Authorization Servers when registering</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "oauth2";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
