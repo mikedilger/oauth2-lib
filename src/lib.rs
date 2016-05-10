@@ -61,13 +61,13 @@ apply:
 
 extern crate url;
 
-use std::fmt;
-use std::fmt::Display;
-
 pub mod syntax;
 pub mod resource_server;
 pub mod authorization_server;
 pub mod client;
+pub mod client_type;
+
+pub use client_type::ClientType;
 
 /// Client Identifier, issued to Clients by Authorization Servers when registering
 ///
@@ -82,24 +82,3 @@ pub mod client;
 pub type ClientId = String;
 
 
-/// Client Type, either 'confidential' or 'public'.
-///
-/// See RFC 6749 Section 2.2.   In particular:
-/// <ul>
-/// <li>If the client cannot be trusted with secrets, it is 'public'.  This usually includes
-///     all clients in end-user hands like javascript ones, but strictly speaking it depends
-///     on your security model.</li>
-/// </ul>
-pub enum ClientType {
-    ConfidentialClient,
-    PublicClient,
-}
-impl Display for ClientType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
-    {
-        match *self {
-            ClientType::ConfidentialClient => write!(f, "confidential"),
-            ClientType::PublicClient => write!(f, "public"),
-        }
-    }
-}
