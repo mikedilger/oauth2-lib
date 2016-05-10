@@ -9,7 +9,7 @@ WARNING: We've just started.  It is practically useless at this point.
 OAuth 2.0 is a protocol framework that allows an application (the <em>Client</em>, usually a web
 site) to obtain limited access to an HTTP service (the <em>Resource Server</em>) on behalf of
 a <em>Resource Owner</em> which interacts with the Client via a <em>User-Agent</em> (browser).
-This is mediated via an <em>Authorization Server</em> (which could be th Resource Server
+This is mediated via an <em>Authorization Server</em> (which could be the Resource Server
 itself, or separated from it).
 
 <blockquote>
@@ -25,8 +25,8 @@ the missing pieces.  And there are quite a few missing pieces which you will nee
 in order to get a working system.  These include:
 
 <ul>
-<li>Issuing and receiving HTTP requests (e.g. you'll need to plug in some HTTP
-    library, we won't pick one for you).</li>
+<li>Issuing and receiving HTTP requests (e.g. you'll need to work with HTTP somehow,
+    perhaps with hyper or other HTTP related library, or directly).</li>
 <li>Storing state.  Often database tables are used.  Manytimes the Authorization
     Server and Resource Server use the same database, or perhaps are the same
     server.  This is out of scope, and left up to you.</li>
