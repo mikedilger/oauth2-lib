@@ -4,10 +4,8 @@ version = "0.0.0"
 authors = [ "mike@mikedilger.com" ]
 
 [lib]
-
 name = "oauth2"
 path = "src/lib.rs"
 
-[dependencies.url]
-
-git = "https://github.com/servo/rust-url"
+[dependencies]
+url = "1.1"

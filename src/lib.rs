@@ -59,12 +59,10 @@ apply:
 </ul>
 */
 
-#![experimental]
-
 extern crate url;
 
 use std::fmt;
-use std::fmt::Show;
+use std::fmt::Display;
 
 pub mod syntax;
 pub mod resource_server;
@@ -96,12 +94,12 @@ pub enum ClientType {
     ConfidentialClient,
     PublicClient,
 }
-impl Show for ClientType {
+impl Display for ClientType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
     {
         match *self {
-            ConfidentialClient => write!(f, "confidential"),
-            PublicClient => write!(f, "public"),
+            ClientType::ConfidentialClient => write!(f, "confidential"),
+            ClientType::PublicClient => write!(f, "public"),
         }
     }
 }

@@ -9,7 +9,7 @@ pub fn valid_client_secret_str<'a>(client_secret: &'a str) -> bool {
 }
 
 pub fn valid_response_type_str<'a>(response_type: &'a str) -> bool {
-    for t in response_type.split('\u0020') {
+    for t in response_type.split('\u{0020}') {
         if t.len() == 0 { return false };
         if ! str_is_digit_alpha_under(response_type) { return false };
     }
@@ -74,7 +74,7 @@ pub fn valid_refresh_token_str<'a>(refresh_token: &'a str) -> bool {
 /// Returns true if c is a digit
 fn char_is_digit(c: char) -> bool {
     match c {
-        '0'..'9' => true,
+        '0'...'9' => true,
         _ => false,
     }
 }
@@ -99,7 +99,7 @@ fn test_str_is_digits() {
 /// Returns true if char meets RFC 6749 Appendix A definition for name-char
 fn char_is_name_char(c: char) -> bool {
     match c {
-        '-' | '.' | '_' | '0'..'9' | 'A'..'Z' | 'a'..'z' => true,
+        '-' | '.' | '_' | '0'...'9' | 'A'...'Z' | 'a'...'z' => true,
         _ => false,
     }
 }
@@ -126,11 +126,11 @@ fn test_str_is_name() {
 ///    "_" / DIGIT / ALPHA
 fn char_is_digit_alpha_under(c: char) -> bool {
     match c {
-            '\u0030'..'\u0039' => true, // digit
-            '\u0041'..'\u005A' => true, // alpha upper
-            '\u0061'..'\u007A' => true, // alpha lower
-            '\u005F' => true, // underscore
-            _ => false
+        '\u{0030}'...'\u{0039}' => true, // digit
+        '\u{0041}'...'\u{005A}' => true, // alpha upper
+        '\u{0061}'...'\u{007A}' => true, // alpha lower
+        '\u{005F}' => true, // underscore
+        _ => false
     }
 }
 /// Returns true if string meets RFC 6749 Appendix A definition for:
@@ -154,7 +154,7 @@ fn test_str_is_digit_alpha_under() {
 /// Returns true if char meets RFC 6749 Appendix A definition for VSCHAR
 fn char_is_vschar(c: char) -> bool {
     match c {
-        '\u0020'..'\u007E' => true,
+        '\u{0020}'...'\u{007E}' => true,
         _ => false
     }
 }
@@ -170,15 +170,15 @@ fn str_is_vschar<'a>(v: &'a str) -> bool {
 fn test_str_is_vschar() {
     assert!(str_is_vschar(""));
     assert!(str_is_vschar(" !\"\\~lj"));
-    assert!(! str_is_vschar("\u0009"));
+    assert!(! str_is_vschar("\u{0009}"));
 }
 
 /// Returns true if char meets RFC 6749 Appendix A definition for NQCHAR
 fn char_is_nqchar(c: char) -> bool {
     match c {
-        '\u0021' => true,
-        '\u0023'..'\u005B' => true,
-        '\u005D'..'\u007E' => true,
+        '\u{0021}' => true,
+        '\u{0023}'...'\u{005B}' => true,
+        '\u{005D}'...'\u{007E}' => true,
         _ => false
     }
 }
@@ -195,51 +195,51 @@ fn test_is_nqchar() {
     assert!(str_is_nqchar(""));
     assert!(str_is_nqchar("!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"));
 
-    assert!(! str_is_nqchar("\u0000"));
-    assert!(! str_is_nqchar("\u0001"));
-    assert!(! str_is_nqchar("\u0002"));
-    assert!(! str_is_nqchar("\u0003"));
-    assert!(! str_is_nqchar("\u0004"));
-    assert!(! str_is_nqchar("\u0005"));
-    assert!(! str_is_nqchar("\u0006"));
-    assert!(! str_is_nqchar("\u0007"));
-    assert!(! str_is_nqchar("\u0008"));
-    assert!(! str_is_nqchar("\u0009"));
-    assert!(! str_is_nqchar("\u000A"));
-    assert!(! str_is_nqchar("\u000B"));
-    assert!(! str_is_nqchar("\u000C"));
-    assert!(! str_is_nqchar("\u000D"));
-    assert!(! str_is_nqchar("\u000E"));
-    assert!(! str_is_nqchar("\u000F"));
-    assert!(! str_is_nqchar("\u0010"));
-    assert!(! str_is_nqchar("\u0011"));
-    assert!(! str_is_nqchar("\u0012"));
-    assert!(! str_is_nqchar("\u0013"));
-    assert!(! str_is_nqchar("\u0014"));
-    assert!(! str_is_nqchar("\u0015"));
-    assert!(! str_is_nqchar("\u0016"));
-    assert!(! str_is_nqchar("\u0017"));
-    assert!(! str_is_nqchar("\u0018"));
-    assert!(! str_is_nqchar("\u0019"));
-    assert!(! str_is_nqchar("\u001A"));
-    assert!(! str_is_nqchar("\u001B"));
-    assert!(! str_is_nqchar("\u001C"));
-    assert!(! str_is_nqchar("\u001D"));
-    assert!(! str_is_nqchar("\u001E"));
-    assert!(! str_is_nqchar("\u001F"));
-    assert!(! str_is_nqchar("\u0020"));
-    assert!(! str_is_nqchar("\u0022"));
-    assert!(! str_is_nqchar("\u005C"));
-    assert!(! str_is_nqchar("\u007F"));
-    assert!(! str_is_nqchar("\uC800"));
+    assert!(! str_is_nqchar("\u{0000}"));
+    assert!(! str_is_nqchar("\u{0001}"));
+    assert!(! str_is_nqchar("\u{0002}"));
+    assert!(! str_is_nqchar("\u{0003}"));
+    assert!(! str_is_nqchar("\u{0004}"));
+    assert!(! str_is_nqchar("\u{0005}"));
+    assert!(! str_is_nqchar("\u{0006}"));
+    assert!(! str_is_nqchar("\u{0007}"));
+    assert!(! str_is_nqchar("\u{0008}"));
+    assert!(! str_is_nqchar("\u{0009}"));
+    assert!(! str_is_nqchar("\u{000A}"));
+    assert!(! str_is_nqchar("\u{000B}"));
+    assert!(! str_is_nqchar("\u{000C}"));
+    assert!(! str_is_nqchar("\u{000D}"));
+    assert!(! str_is_nqchar("\u{000E}"));
+    assert!(! str_is_nqchar("\u{000F}"));
+    assert!(! str_is_nqchar("\u{0010}"));
+    assert!(! str_is_nqchar("\u{0011}"));
+    assert!(! str_is_nqchar("\u{0012}"));
+    assert!(! str_is_nqchar("\u{0013}"));
+    assert!(! str_is_nqchar("\u{0014}"));
+    assert!(! str_is_nqchar("\u{0015}"));
+    assert!(! str_is_nqchar("\u{0016}"));
+    assert!(! str_is_nqchar("\u{0017}"));
+    assert!(! str_is_nqchar("\u{0018}"));
+    assert!(! str_is_nqchar("\u{0019}"));
+    assert!(! str_is_nqchar("\u{001A}"));
+    assert!(! str_is_nqchar("\u{001B}"));
+    assert!(! str_is_nqchar("\u{001C}"));
+    assert!(! str_is_nqchar("\u{001D}"));
+    assert!(! str_is_nqchar("\u{001E}"));
+    assert!(! str_is_nqchar("\u{001F}"));
+    assert!(! str_is_nqchar("\u{0020}"));
+    assert!(! str_is_nqchar("\u{0022}"));
+    assert!(! str_is_nqchar("\u{005C}"));
+    assert!(! str_is_nqchar("\u{007F}"));
+    assert!(! str_is_nqchar("\u{C800}"));
 }
 
 /// Returns true if char meets RFC 6749 Appendix A definition for NQSCHAR
 fn char_is_nqschar(c: char) -> bool {
     match c {
-        '\u0020'..'\u0021' => true,
-        '\u0023'..'\u005B' => true,
-        '\u005D'..'\u007E' => true,
+        '\u{0020}'...'\u{0021}' => true,
+        '\u{0023}'...'\u{005B}' => true,
+        '\u{005D}'...'\u{007E}' => true,
         _ => false
     }
 }
@@ -256,53 +256,53 @@ fn test_str_str_is_nqschar() {
     assert!(str_is_nqschar(""));
     assert!(str_is_nqschar(" !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"));
 
-    assert!(! str_is_nqschar("\u0000"));
-    assert!(! str_is_nqschar("\u0001"));
-    assert!(! str_is_nqschar("\u0002"));
-    assert!(! str_is_nqschar("\u0003"));
-    assert!(! str_is_nqschar("\u0004"));
-    assert!(! str_is_nqschar("\u0005"));
-    assert!(! str_is_nqschar("\u0006"));
-    assert!(! str_is_nqschar("\u0007"));
-    assert!(! str_is_nqschar("\u0008"));
-    assert!(! str_is_nqschar("\u0009"));
-    assert!(! str_is_nqschar("\u000A"));
-    assert!(! str_is_nqschar("\u000B"));
-    assert!(! str_is_nqschar("\u000C"));
-    assert!(! str_is_nqschar("\u000D"));
-    assert!(! str_is_nqschar("\u000E"));
-    assert!(! str_is_nqschar("\u000F"));
-    assert!(! str_is_nqschar("\u0010"));
-    assert!(! str_is_nqschar("\u0011"));
-    assert!(! str_is_nqschar("\u0012"));
-    assert!(! str_is_nqschar("\u0013"));
-    assert!(! str_is_nqschar("\u0014"));
-    assert!(! str_is_nqschar("\u0015"));
-    assert!(! str_is_nqschar("\u0016"));
-    assert!(! str_is_nqschar("\u0017"));
-    assert!(! str_is_nqschar("\u0018"));
-    assert!(! str_is_nqschar("\u0019"));
-    assert!(! str_is_nqschar("\u001A"));
-    assert!(! str_is_nqschar("\u001B"));
-    assert!(! str_is_nqschar("\u001C"));
-    assert!(! str_is_nqschar("\u001D"));
-    assert!(! str_is_nqschar("\u001E"));
-    assert!(! str_is_nqschar("\u001F"));
-    assert!(! str_is_nqschar("\u0022"));
-    assert!(! str_is_nqschar("\u005C"));
-    assert!(! str_is_nqschar("\u007F"));
-    assert!(! str_is_nqschar("\uC800"));
+    assert!(! str_is_nqschar("\u{0000}"));
+    assert!(! str_is_nqschar("\u{0001}"));
+    assert!(! str_is_nqschar("\u{0002}"));
+    assert!(! str_is_nqschar("\u{0003}"));
+    assert!(! str_is_nqschar("\u{0004}"));
+    assert!(! str_is_nqschar("\u{0005}"));
+    assert!(! str_is_nqschar("\u{0006}"));
+    assert!(! str_is_nqschar("\u{0007}"));
+    assert!(! str_is_nqschar("\u{0008}"));
+    assert!(! str_is_nqschar("\u{0009}"));
+    assert!(! str_is_nqschar("\u{000A}"));
+    assert!(! str_is_nqschar("\u{000B}"));
+    assert!(! str_is_nqschar("\u{000C}"));
+    assert!(! str_is_nqschar("\u{000D}"));
+    assert!(! str_is_nqschar("\u{000E}"));
+    assert!(! str_is_nqschar("\u{000F}"));
+    assert!(! str_is_nqschar("\u{0010}"));
+    assert!(! str_is_nqschar("\u{0011}"));
+    assert!(! str_is_nqschar("\u{0012}"));
+    assert!(! str_is_nqschar("\u{0013}"));
+    assert!(! str_is_nqschar("\u{0014}"));
+    assert!(! str_is_nqschar("\u{0015}"));
+    assert!(! str_is_nqschar("\u{0016}"));
+    assert!(! str_is_nqschar("\u{0017}"));
+    assert!(! str_is_nqschar("\u{0018}"));
+    assert!(! str_is_nqschar("\u{0019}"));
+    assert!(! str_is_nqschar("\u{001A}"));
+    assert!(! str_is_nqschar("\u{001B}"));
+    assert!(! str_is_nqschar("\u{001C}"));
+    assert!(! str_is_nqschar("\u{001D}"));
+    assert!(! str_is_nqschar("\u{001E}"));
+    assert!(! str_is_nqschar("\u{001F}"));
+    assert!(! str_is_nqschar("\u{0022}"));
+    assert!(! str_is_nqschar("\u{005C}"));
+    assert!(! str_is_nqschar("\u{007F}"));
+    assert!(! str_is_nqschar("\u{C800}"));
 }
 
 /// Returns true if char meets RFC 6749 Appendix A definition for UNICODECHARNOCRLF
 /// (which perhaps confusingly excludes more than just CR and LF)
 fn char_is_unicodecharnocrlf(c: char) -> bool {
     match c {
-        '\u0009' => true,
-        '\u0020'..'\u007E' => true,
-        '\u0080'..'\uD7FF' => true,
-        '\uE000'..'\uFFFD' => true,
-        '\U00010000'..'\U0010FFFF' => true,
+        '\u{0009}' => true,
+        '\u{0020}'...'\u{007E}' => true,
+        '\u{0080}'...'\u{D7FF}' => true,
+        '\u{E000}'...'\u{FFFD}' => true,
+        '\u{10000}'...'\u{10FFFF}' => true,
         _ => false
     }
 }
@@ -319,11 +319,11 @@ fn str_is_unicodecharnocrlf<'a>(v: &'a str) -> bool {
 fn test_str_is_unicodecharnocrlf() {
     assert!(str_is_unicodecharnocrlf(""));
     assert!(str_is_unicodecharnocrlf("Hello My 2nd Son"));
-    assert!(str_is_unicodecharnocrlf("\uC800\U0010FFFC\uE00594"));
+    assert!(str_is_unicodecharnocrlf("\u{C800}\u{10FFFC}\u{E005}94"));
     assert!(! str_is_unicodecharnocrlf("Hello My\n 2nd Son"));
-    assert!(! str_is_unicodecharnocrlf("Hello My\u007F 2nd Son"));
-    assert!(! str_is_unicodecharnocrlf("\u0001"));
-    assert!(! str_is_unicodecharnocrlf("\u0019"));
+    assert!(! str_is_unicodecharnocrlf("Hello My\u{007F} 2nd Son"));
+    assert!(! str_is_unicodecharnocrlf("\u{0001}"));
+    assert!(! str_is_unicodecharnocrlf("\u{0019}"));
 }
 
 // All ascii chars:
