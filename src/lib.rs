@@ -25,60 +25,62 @@ the missing pieces.  And there are quite a few missing pieces which you will nee
 in order to get a working system.  These include:
 
 <ul>
-<li>Issuing and receiving HTTP requests (e.g. you'll need to work with HTTP somehow,
-    perhaps with hyper or other HTTP related library, or directly).</li>
+<li>Initial client registration (between the Client and the Authorization
+    Server).  Often people just use config files, but this is for you to decide.</li>
 <li>Storing state.  Often database tables are used.  Manytimes the Authorization
     Server and Resource Server use the same database, or perhaps are the same
     server.  This is out of scope, and left up to you.</li>
-<li>Initial client registration (between the Client and the Authorization
-    Server).  Often people just use config files, but this is for you to decide.</li>
-<li>Client authentication (by the Authorization Server)</li>
-<li>User-Agent session management (by the Client).  Usually via a session cookie,
-    but we leave this up to you.</li>
-<li>User-Agent authentication and authorization (by the Authorization Server)</li>
-<li>Perhaps more</li>
+<li>User-Agent authentication and authorization (by the Authorization Server), where you
+    should not only authenticate the resource owner, but also ask them if they really want
+    to allow the client to have the rights to act on their behalf under the Scope
+    requested.</li>
 </ul>
 
 <h2>Sample Implementation</h2>
 
-FIXME: A sample implementation is intended to be supplied to demonstrate how to use this
-library.
+Please see `tests/lib.rs` for a sample implementation.
 
 <h2>Coverage and Standard Support</h2>
 
 We do not (and likely will not) support every standard compliant way to use OAuth 2.0.
-But we do try to be as flexible as possible.  That being said, the following limitations
-apply:
+But we will try to be as flexible as possible, and extend this library as time and resources
+allow.  That being said, the following limitations currently apply:
 
 <ul>
-<li>All HTTP traffic is required to be TLS protected.  All endpoints must use the
-    <em>https</em> scheme.  The standard only requires this of most traffic.</li>
+<li>We only explicitly support the "authorization code" grant type, which is the most common
+    and most secure.  "Implicit", "resource owner password credentials", and "client
+    credentials" grant types are not supported.
+<li>The authorization server acts on behalf of the resource server, so virtually we are not
+    supporting independent resource servers.
+<li>We do not enforce that traffic be protected via TLS, although the standard requires that
+    most (and suggests all) traffic be so protected.  This is left up to the user.</li>
 <li>All IDs and tokens are taken to be respresented in UTF-8 encodings.  We will not
     work with other encodings.  The standard is silent on most encoding issues.</li>
+<li>Refresh tokens are not yet supported</li>
+<li>I'm not sure that the HTTP Status Codes returned to the user-agent on various failures
+    are appropriate.</li>
 <li>FIXME: More limitations will be added to this list as the development progresses.</li>
 </ul>
 */
 
+#![feature(custom_derive, plugin)]
+#![plugin(serde_macros)]
+
 extern crate url;
+#[macro_use] extern crate hyper;
+extern crate textnonce;
+extern crate serde_json;
 
 pub mod syntax;
-pub mod resource_server;
-pub mod authorization_server;
+pub mod authz_server;
 pub mod client;
 pub mod client_type;
+pub mod client_data;
+pub mod error;
 
+pub use authz_server::{AuthzServer, AuthzErrorCode, AuthzError, TokenErrorCode,
+                       TokenError, AuthzRequestData, TokenData};
+pub use client::Client;
 pub use client_type::ClientType;
-
-/// Client Identifier, issued to Clients by Authorization Servers when registering
-///
-/// See RFC 6749 Section 2.2.   In particular:
-/// <ul>
-/// <li>The authorization server issues this to the client at registration, and uses it
-///     to look up details about the client during the main protocol.</li>
-/// <li>It is not a secret.</li>
-/// </ul>
-//
-/// Charset validator ```syntax::valid_client_id_str```
-pub type ClientId = String;
-
-
+pub use client_data::ClientData;
+pub use error::OauthError;
