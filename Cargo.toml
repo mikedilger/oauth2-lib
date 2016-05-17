@@ -1,7 +1,7 @@
 [package]
-name = "oauth2"
-version = "0.2.0"
-description = "OAuth 2.0 library"
+name = "oauth2-lib"
+version = "0.3.0"
+description = "OAuth 2.0 library for supporting clients and servers"
 authors = [
         "Mike Dilger <mike@optcomp.nz>"
 ]
@@ -9,7 +9,7 @@ readme = "README.md"
 repository = "https://github.com/mikedilger/rust-oauth2"
 documentation = "https://mikedilger.github.io/rust-oauth2"
 license = "MIT OR Apache-2.0"
-keywords = [ "oauth2" ]
+keywords = [ "oauth", "oauth2" ]
 
 [lib]
 name = "oauth2"
