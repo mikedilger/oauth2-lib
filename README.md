@@ -6,7 +6,10 @@ This is an OAuth 2.0 library for the Rust language.  It defines types and
 traits useful for implementing an OAuth 2.0 compliant system as specified by
 <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
 
-WARNING: We've just started.  It is practically useless at this point.
+The current implementation allows you to build the most common and most secure
+type of OAuth 2.0 infrastructure, but is not complete, and may not be
+absolutely correct.  Please file bug reports or pull requests if you notice
+any deviation from RFC 6749, or if you have any other issues.
 
 ## License
 
