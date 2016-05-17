@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -384,10 +385,10 @@
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>valid_response_type_str</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>response_type</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>for</span> <span class='ident'>t</span> <span class='kw'>in</span> <span class='ident'>response_type</span>.<span class='ident'>split</span>(<span class='string'>&#39;\u{0020}&#39;</span>) {
-        <span class='kw'>if</span> <span class='ident'>t</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='boolval'>false</span> };
-        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>str_is_digit_alpha_under</span>(<span class='ident'>response_type</span>) { <span class='kw'>return</span> <span class='boolval'>false</span> };
+        <span class='kw'>if</span> <span class='ident'>t</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='number'>0</span> { <span class='kw'>return</span> <span class='boolvalue'>false</span> };
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>str_is_digit_alpha_under</span>(<span class='ident'>response_type</span>) { <span class='kw'>return</span> <span class='boolvalue'>false</span> };
     }
-    <span class='boolval'>true</span>
+    <span class='boolvalue'>true</span>
 }
 
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>valid_scope_str</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>scope</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
@@ -448,8 +449,8 @@
 <span class='doccomment'>/// Returns true if c is a digit</span>
 <span class='kw'>fn</span> <span class='ident'>char_is_digit</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='ident'>c</span> {
-        <span class='string'>&#39;0&#39;</span>...<span class='string'>&#39;9&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>,
+        <span class='string'>&#39;0&#39;</span>...<span class='string'>&#39;9&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        _ <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>,
     }
 }
 
@@ -457,9 +458,9 @@
 <span class='kw'>fn</span> <span class='ident'>str_is_digits</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>chars</span>().<span class='ident'>collect</span>();
     <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
-        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_digit</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolval'>false</span>; };
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_digit</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolvalue'>false</span>; };
     }
-    <span class='boolval'>true</span>
+    <span class='boolvalue'>true</span>
 }
 
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -473,8 +474,8 @@
 <span class='doccomment'>/// Returns true if char meets RFC 6749 Appendix A definition for name-char</span>
 <span class='kw'>fn</span> <span class='ident'>char_is_name_char</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='ident'>c</span> {
-        <span class='string'>&#39;-&#39;</span> <span class='op'>|</span> <span class='string'>&#39;.&#39;</span> <span class='op'>|</span> <span class='string'>&#39;_&#39;</span> <span class='op'>|</span> <span class='string'>&#39;0&#39;</span>...<span class='string'>&#39;9&#39;</span> <span class='op'>|</span> <span class='string'>&#39;A&#39;</span>...<span class='string'>&#39;Z&#39;</span> <span class='op'>|</span> <span class='string'>&#39;a&#39;</span>...<span class='string'>&#39;z&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>,
+        <span class='string'>&#39;-&#39;</span> <span class='op'>|</span> <span class='string'>&#39;.&#39;</span> <span class='op'>|</span> <span class='string'>&#39;_&#39;</span> <span class='op'>|</span> <span class='string'>&#39;0&#39;</span>...<span class='string'>&#39;9&#39;</span> <span class='op'>|</span> <span class='string'>&#39;A&#39;</span>...<span class='string'>&#39;Z&#39;</span> <span class='op'>|</span> <span class='string'>&#39;a&#39;</span>...<span class='string'>&#39;z&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        _ <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>,
     }
 }
 
@@ -482,9 +483,9 @@
 <span class='kw'>fn</span> <span class='ident'>str_is_name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>chars</span>().<span class='ident'>collect</span>();
     <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
-        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_name_char</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolval'>false</span>; };
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_name_char</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolvalue'>false</span>; };
     }
-    <span class='boolval'>true</span>
+    <span class='boolvalue'>true</span>
 }
 
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -500,11 +501,11 @@
 <span class='doccomment'>///    &quot;_&quot; / DIGIT / ALPHA</span>
 <span class='kw'>fn</span> <span class='ident'>char_is_digit_alpha_under</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='ident'>c</span> {
-        <span class='string'>&#39;\u{0030}&#39;</span>...<span class='string'>&#39;\u{0039}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>, <span class='comment'>// digit</span>
-        <span class='string'>&#39;\u{0041}&#39;</span>...<span class='string'>&#39;\u{005A}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>, <span class='comment'>// alpha upper</span>
-        <span class='string'>&#39;\u{0061}&#39;</span>...<span class='string'>&#39;\u{007A}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>, <span class='comment'>// alpha lower</span>
-        <span class='string'>&#39;\u{005F}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>, <span class='comment'>// underscore</span>
-        _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>
+        <span class='string'>&#39;\u{0030}&#39;</span>...<span class='string'>&#39;\u{0039}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>, <span class='comment'>// digit</span>
+        <span class='string'>&#39;\u{0041}&#39;</span>...<span class='string'>&#39;\u{005A}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>, <span class='comment'>// alpha upper</span>
+        <span class='string'>&#39;\u{0061}&#39;</span>...<span class='string'>&#39;\u{007A}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>, <span class='comment'>// alpha lower</span>
+        <span class='string'>&#39;\u{005F}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>, <span class='comment'>// underscore</span>
+        _ <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>
     }
 }
 <span class='doccomment'>/// Returns true if string meets RFC 6749 Appendix A definition for:</span>
@@ -512,9 +513,9 @@
 <span class='kw'>fn</span> <span class='ident'>str_is_digit_alpha_under</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>chars</span>().<span class='ident'>collect</span>();
     <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
-        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_digit_alpha_under</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolval'>false</span>; };
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_digit_alpha_under</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolvalue'>false</span>; };
     }
-    <span class='boolval'>true</span>
+    <span class='boolvalue'>true</span>
 }
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>test_str_is_digit_alpha_under</span>() {
@@ -528,17 +529,17 @@
 <span class='doccomment'>/// Returns true if char meets RFC 6749 Appendix A definition for VSCHAR</span>
 <span class='kw'>fn</span> <span class='ident'>char_is_vschar</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='ident'>c</span> {
-        <span class='string'>&#39;\u{0020}&#39;</span>...<span class='string'>&#39;\u{007E}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>
+        <span class='string'>&#39;\u{0020}&#39;</span>...<span class='string'>&#39;\u{007E}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        _ <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>
     }
 }
 <span class='doccomment'>/// Returns true if string meets RFC 6749 Appendix A definition for VSCHAR</span>
 <span class='kw'>fn</span> <span class='ident'>str_is_vschar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>chars</span>().<span class='ident'>collect</span>();
     <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
-        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_vschar</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolval'>false</span>; }
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_vschar</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolvalue'>false</span>; }
     }
-    <span class='boolval'>true</span>
+    <span class='boolvalue'>true</span>
 }
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>test_str_is_vschar</span>() {
@@ -550,19 +551,19 @@
 <span class='doccomment'>/// Returns true if char meets RFC 6749 Appendix A definition for NQCHAR</span>
 <span class='kw'>fn</span> <span class='ident'>char_is_nqchar</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='ident'>c</span> {
-        <span class='string'>&#39;\u{0021}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='string'>&#39;\u{0023}&#39;</span>...<span class='string'>&#39;\u{005B}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='string'>&#39;\u{005D}&#39;</span>...<span class='string'>&#39;\u{007E}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>
+        <span class='string'>&#39;\u{0021}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        <span class='string'>&#39;\u{0023}&#39;</span>...<span class='string'>&#39;\u{005B}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        <span class='string'>&#39;\u{005D}&#39;</span>...<span class='string'>&#39;\u{007E}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        _ <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>
     }
 }
 <span class='doccomment'>/// Returns true if str meets RFC 6749 Appendix A definition for NQCHAR</span>
 <span class='kw'>fn</span> <span class='ident'>str_is_nqchar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>chars</span>().<span class='ident'>collect</span>();
     <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
-        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_nqchar</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolval'>false</span>; }
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_nqchar</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolvalue'>false</span>; }
     }
-    <span class='boolval'>true</span>
+    <span class='boolvalue'>true</span>
 }
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>test_is_nqchar</span>() {
@@ -611,19 +612,19 @@
 <span class='doccomment'>/// Returns true if char meets RFC 6749 Appendix A definition for NQSCHAR</span>
 <span class='kw'>fn</span> <span class='ident'>char_is_nqschar</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='ident'>c</span> {
-        <span class='string'>&#39;\u{0020}&#39;</span>...<span class='string'>&#39;\u{0021}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='string'>&#39;\u{0023}&#39;</span>...<span class='string'>&#39;\u{005B}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='string'>&#39;\u{005D}&#39;</span>...<span class='string'>&#39;\u{007E}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>
+        <span class='string'>&#39;\u{0020}&#39;</span>...<span class='string'>&#39;\u{0021}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        <span class='string'>&#39;\u{0023}&#39;</span>...<span class='string'>&#39;\u{005B}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        <span class='string'>&#39;\u{005D}&#39;</span>...<span class='string'>&#39;\u{007E}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        _ <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>
     }
 }
 <span class='doccomment'>/// Returns true if str meets RFC 6749 Appendix A definition for NQSCHAR</span>
 <span class='kw'>fn</span> <span class='ident'>str_is_nqschar</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>chars</span>().<span class='ident'>collect</span>();
     <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
-        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_nqschar</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolval'>false</span>; }
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_nqschar</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolvalue'>false</span>; }
     }
-    <span class='boolval'>true</span>
+    <span class='boolvalue'>true</span>
 }
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>test_str_str_is_nqschar</span>() {
@@ -672,12 +673,12 @@
 <span class='doccomment'>/// (which perhaps confusingly excludes more than just CR and LF)</span>
 <span class='kw'>fn</span> <span class='ident'>char_is_unicodecharnocrlf</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>match</span> <span class='ident'>c</span> {
-        <span class='string'>&#39;\u{0009}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='string'>&#39;\u{0020}&#39;</span>...<span class='string'>&#39;\u{007E}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='string'>&#39;\u{0080}&#39;</span>...<span class='string'>&#39;\u{D7FF}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='string'>&#39;\u{E000}&#39;</span>...<span class='string'>&#39;\u{FFFD}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        <span class='string'>&#39;\u{10000}&#39;</span>...<span class='string'>&#39;\u{10FFFF}&#39;</span> <span class='op'>=&gt;</span> <span class='boolval'>true</span>,
-        _ <span class='op'>=&gt;</span> <span class='boolval'>false</span>
+        <span class='string'>&#39;\u{0009}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        <span class='string'>&#39;\u{0020}&#39;</span>...<span class='string'>&#39;\u{007E}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        <span class='string'>&#39;\u{0080}&#39;</span>...<span class='string'>&#39;\u{D7FF}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        <span class='string'>&#39;\u{E000}&#39;</span>...<span class='string'>&#39;\u{FFFD}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        <span class='string'>&#39;\u{10000}&#39;</span>...<span class='string'>&#39;\u{10FFFF}&#39;</span> <span class='op'>=&gt;</span> <span class='boolvalue'>true</span>,
+        _ <span class='op'>=&gt;</span> <span class='boolvalue'>false</span>
     }
 }
 <span class='doccomment'>/// Returns true if str meets RFC 6749 Appendix A definition for UNICODECHARNOCRLF</span>
@@ -685,9 +686,9 @@
 <span class='kw'>fn</span> <span class='ident'>str_is_unicodecharnocrlf</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>v</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>vec</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>char</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>chars</span>().<span class='ident'>collect</span>();
     <span class='kw'>for</span> <span class='ident'>c</span> <span class='kw'>in</span> <span class='ident'>vec</span>.<span class='ident'>iter</span>() {
-        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_unicodecharnocrlf</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolval'>false</span>; }
+        <span class='kw'>if</span> <span class='op'>!</span> <span class='ident'>char_is_unicodecharnocrlf</span>(<span class='op'>*</span><span class='ident'>c</span>) { <span class='kw'>return</span> <span class='boolvalue'>false</span>; }
     }
-    <span class='boolval'>true</span>
+    <span class='boolvalue'>true</span>
 }
 <span class='attribute'>#[<span class='ident'>test</span>]</span>
 <span class='kw'>fn</span> <span class='ident'>test_str_is_unicodecharnocrlf</span>() {

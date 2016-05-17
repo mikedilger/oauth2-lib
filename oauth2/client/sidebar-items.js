@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["OAuth2Client",""]]});
+initSidebarItems({"trait":[["Client",""]]});

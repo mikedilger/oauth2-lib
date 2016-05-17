@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["OAuth2ResourceServer",""]]});

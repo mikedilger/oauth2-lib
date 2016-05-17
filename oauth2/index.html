@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -46,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/oauth2/src/lib.rs.html#1-105' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-0' class='srclink' href='../src/oauth2/src/lib.rs.html#1-86' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>This is an OAuth 2.0 library for the Rust language.  It defines types and traits useful
 for implementing an OAuth 2.0 compliant system as specified by RFC 6749.</p>
 
@@ -73,43 +74,48 @@ the missing pieces.  And there are quite a few missing pieces which you will nee
 in order to get a working system.  These include:</p>
 
 <ul>
-<li>Issuing and receiving HTTP requests (e.g. you'll need to work with HTTP somehow,
-    perhaps with hyper or other HTTP related library, or directly).</li>
+<li>Initial client registration (between the Client and the Authorization
+    Server).  Often people just use config files, but this is for you to decide.</li>
 <li>Storing state.  Often database tables are used.  Manytimes the Authorization
     Server and Resource Server use the same database, or perhaps are the same
     server.  This is out of scope, and left up to you.</li>
-<li>Initial client registration (between the Client and the Authorization
-    Server).  Often people just use config files, but this is for you to decide.</li>
-<li>Client authentication (by the Authorization Server)</li>
-<li>User-Agent session management (by the Client).  Usually via a session cookie,
-    but we leave this up to you.</li>
-<li>User-Agent authentication and authorization (by the Authorization Server)</li>
-<li>Perhaps more</li>
+<li>User-Agent authentication and authorization (by the Authorization Server), where you
+    should not only authenticate the resource owner, but also ask them if they really want
+    to allow the client to have the rights to act on their behalf under the Scope
+    requested.</li>
 </ul>
 
 <h2>Sample Implementation</h2>
 
-<p>FIXME: A sample implementation is intended to be supplied to demonstrate how to use this
-library.</p>
+<p>Please see <code>tests/lib.rs</code> for a sample implementation.</p>
 
 <h2>Coverage and Standard Support</h2>
 
 <p>We do not (and likely will not) support every standard compliant way to use OAuth 2.0.
-But we do try to be as flexible as possible.  That being said, the following limitations
-apply:</p>
+But we will try to be as flexible as possible, and extend this library as time and resources
+allow.  That being said, the following limitations currently apply:</p>
 
 <ul>
-<li>All HTTP traffic is required to be TLS protected.  All endpoints must use the
-    <em>https</em> scheme.  The standard only requires this of most traffic.</li>
+<li>We only explicitly support the "authorization code" grant type, which is the most common
+    and most secure.  "Implicit", "resource owner password credentials", and "client
+    credentials" grant types are not supported.
+<li>The authorization server acts on behalf of the resource server, so virtually we are not
+    supporting independent resource servers.
+<li>We do not enforce that traffic be protected via TLS, although the standard requires that
+    most (and suggests all) traffic be so protected.  This is left up to the user.</li>
 <li>All IDs and tokens are taken to be respresented in UTF-8 encodings.  We will not
     work with other encodings.  The standard is silent on most encoding issues.</li>
+<li>Refresh tokens are not yet supported</li>
+<li>I'm not sure that the HTTP Status Codes returned to the user-agent on various failures
+    are appropriate.</li>
 <li>FIXME: More limitations will be added to this list as the development progresses.</li>
 </ul>
-</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use authz_server::{<a class='trait' href='../oauth2/authz_server/trait.AuthzServer.html' title='oauth2::authz_server::AuthzServer'>AuthzServer</a>, <a class='enum' href='../oauth2/authz_server/enum.AuthzErrorCode.html' title='oauth2::authz_server::AuthzErrorCode'>AuthzErrorCode</a>, <a class='struct' href='../oauth2/authz_server/struct.AuthzError.html' title='oauth2::authz_server::AuthzError'>AuthzError</a>, <a class='enum' href='../oauth2/authz_server/enum.TokenErrorCode.html' title='oauth2::authz_server::TokenErrorCode'>TokenErrorCode</a>, <a class='struct' href='../oauth2/authz_server/struct.TokenError.html' title='oauth2::authz_server::TokenError'>TokenError</a>, <a class='struct' href='../oauth2/authz_server/struct.AuthzRequestData.html' title='oauth2::authz_server::AuthzRequestData'>AuthzRequestData</a>, <a class='struct' href='../oauth2/authz_server/struct.TokenData.html' title='oauth2::authz_server::TokenData'>TokenData</a>};</code></td></tr><tr><td><code>pub use client::<a class='trait' href='../oauth2/client/trait.Client.html' title='oauth2::client::Client'>Client</a>;</code></td></tr><tr><td><code>pub use client_type::<a class='enum' href='../oauth2/client_type/enum.ClientType.html' title='oauth2::client_type::ClientType'>ClientType</a>;</code></td></tr><tr><td><code>pub use client_data::<a class='struct' href='../oauth2/client_data/struct.ClientData.html' title='oauth2::client_data::ClientData'>ClientData</a>;</code></td></tr><tr><td><code>pub use error::<a class='enum' href='../oauth2/error/enum.OauthError.html' title='oauth2::error::OauthError'>OauthError</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='authorization_server/index.html'
-                                  title='oauth2::authorization_server'>authorization_server</a></td>
+                           <td><a class='mod' href='authz_server/index.html'
+                                  title='oauth2::authz_server'>authz_server</a></td>
                            <td class='docblock short'>
                                 
                            </td>
@@ -122,8 +128,22 @@ apply:</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='resource_server/index.html'
-                                  title='oauth2::resource_server'>resource_server</a></td>
+                           <td><a class='mod' href='client_data/index.html'
+                                  title='oauth2::client_data'>client_data</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='client_type/index.html'
+                                  title='oauth2::client_type'>client_type</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='error/index.html'
+                                  title='oauth2::error'>error</a></td>
                            <td class='docblock short'>
                                 
                            </td>
@@ -133,22 +153,6 @@ apply:</p>
                                   title='oauth2::syntax'>syntax</a></td>
                            <td class='docblock short'>
                                 <p>Syntax validation for OAuth 2.0 elements</p>
-                           </td>
-                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
-<table>
-                       <tr class=' module-item'>
-                           <td><a class='enum' href='enum.ClientType.html'
-                                  title='oauth2::ClientType'>ClientType</a></td>
-                           <td class='docblock short'>
-                                <p>Client Type, either &#39;confidential&#39; or &#39;public&#39;.</p>
-                           </td>
-                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
-<table>
-                       <tr class=' module-item'>
-                           <td><a class='type' href='type.ClientId.html'
-                                  title='oauth2::ClientId'>ClientId</a></td>
-                           <td class='docblock short'>
-                                <p>Client Identifier, issued to Clients by Authorization Servers when registering</p>
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>

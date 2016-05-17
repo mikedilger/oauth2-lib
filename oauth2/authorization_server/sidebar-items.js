@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ClientData","Client data is registered with the Authorization Service out of band prior to the OAuth 2.0 protocol commencing."]],"trait":[["OAuth2AuthorizationServer",""]]});

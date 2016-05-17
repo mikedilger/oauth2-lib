@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Client` trait in crate `oauth2`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Client">
+
+    <title>oauth2::client::Client - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>oauth2</a>::<wbr><a href='index.html'>client</a></p><script>window.sidebarCurrent = {name: 'Client', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>oauth2</a>::<wbr><a href='index.html'>client</a>::<wbr><a class='trait' href=''>Client</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1047' class='srclink' href='../../src/oauth2/src/client.rs.html#12-142' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Client {
+    fn <a href='#tymethod.get_client_data' class='fnname'>get_client_data</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a <a class='struct' href='../../oauth2/client_data/struct.ClientData.html' title='oauth2::client_data::ClientData'>ClientData</a>;
+    fn <a href='#tymethod.store_nonce' class='fnname'>store_nonce</a>(&amp;mut self, token: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>);
+    fn <a href='#tymethod.consume_nonce' class='fnname'>consume_nonce</a>(&amp;mut self, token: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.get_redirect_uri' class='fnname'>get_redirect_uri</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>;
+
+    fn <a href='#method.generate_nonce' class='fnname'>generate_nonce</a>(&amp;mut self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a> { ... }
+    fn <a href='#method.start_oauth' class='fnname'>start_oauth</a>(&amp;mut self, scope: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;, authz_request_url: Url, response: <a class='struct' href='https://hyperium.github.io/hyper/hyper/server/response/struct.Response.html' title='hyper::server::response::Response'>Response</a>) { ... }
+    fn <a href='#method.handle_redirect_url' class='fnname'>handle_redirect_url</a>(&amp;mut self, request: <a class='struct' href='https://hyperium.github.io/hyper/hyper/server/request/struct.Request.html' title='hyper::server::request::Request'>Request</a>, authz_token_url: Url) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../oauth2/authz_server/struct.TokenData.html' title='oauth2::authz_server::TokenData'>TokenData</a>, <a class='struct' href='../../oauth2/authz_server/struct.AuthzError.html' title='oauth2::authz_server::AuthzError'>AuthzError</a>&gt;, <a class='enum' href='../../oauth2/error/enum.OauthError.html' title='oauth2::error::OauthError'>OauthError</a>&gt; { ... }
+}</pre>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.get_client_data' class='method stab '><code>fn <a href='#tymethod.get_client_data' class='fnname'>get_client_data</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a <a class='struct' href='../../oauth2/client_data/struct.ClientData.html' title='oauth2::client_data::ClientData'>ClientData</a></code></h3><div class='docblock'><p>Get own client data</p>
+</div><h3 id='tymethod.store_nonce' class='method stab '><code>fn <a href='#tymethod.store_nonce' class='fnname'>store_nonce</a>(&amp;mut self, token: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>)</code></h3><div class='docblock'><p>Store a nonce, used to prevent cross-site reqeuest forgery.</p>
+</div><h3 id='tymethod.consume_nonce' class='method stab '><code>fn <a href='#tymethod.consume_nonce' class='fnname'>consume_nonce</a>(&amp;mut self, token: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h3><div class='docblock'><p>Consume the nonce from storage, and return true if it was found, false if
+no such nonce existed.</p>
+</div><h3 id='tymethod.get_redirect_uri' class='method stab '><code>fn <a href='#tymethod.get_redirect_uri' class='fnname'>get_redirect_uri</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h3><div class='docblock'><p>Get the redirect URI for this client</p>
+</div></div>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.generate_nonce' class='method stab '><code>fn <a href='#method.generate_nonce' class='fnname'>generate_nonce</a>(&amp;mut self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></h3><h3 id='method.start_oauth' class='method stab '><code>fn <a href='#method.start_oauth' class='fnname'>start_oauth</a>(&amp;mut self, scope: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;, authz_request_url: Url, response: <a class='struct' href='https://hyperium.github.io/hyper/hyper/server/response/struct.Response.html' title='hyper::server::response::Response'>Response</a>)</code></h3><div class='docblock'><p>This is the starting point for the OAuth sequence.  It redirects the user-agent
+to the AuthzServer&#39;s authz_request endpoint</p>
+</div><h3 id='method.handle_redirect_url' class='method stab '><code>fn <a href='#method.handle_redirect_url' class='fnname'>handle_redirect_url</a>(&amp;mut self, request: <a class='struct' href='https://hyperium.github.io/hyper/hyper/server/request/struct.Request.html' title='hyper::server::request::Request'>Request</a>, authz_token_url: Url) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../oauth2/authz_server/struct.TokenData.html' title='oauth2::authz_server::TokenData'>TokenData</a>, <a class='struct' href='../../oauth2/authz_server/struct.AuthzError.html' title='oauth2::authz_server::AuthzError'>AuthzError</a>&gt;, <a class='enum' href='../../oauth2/error/enum.OauthError.html' title='oauth2::error::OauthError'>OauthError</a>&gt;</code></h3><div class='docblock'><p>Handle an HTTP request to the Redirect URL (from the user-agent)</p>
+
+<p>Refer to rfc6749 section 3.1.2 as to the requirements of this endpoint
+(absolute URI, MUST NOT include fragment, MAY include query, SHOULD use TLS)</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    </ul><script type="text/javascript" async
+                         src="../../implementors/oauth2/client/trait.Client.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "oauth2";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
