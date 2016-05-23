@@ -208,30 +208,31 @@ macro_rules! token_response_fail {
     };
 }
 
-pub trait AuthzServer
+pub trait AuthzServer<C>
 {
-    /// Generate a new, unique, `ClientID`
+    // Generate a new, unique, `ClientID`
     // This is part of registering a Client, outside of the scope of the RFC proper.
-    fn generate_new_client_id(&mut self) -> String;
+    // fn generate_new_client_id(&mut self) -> String;
 
-    /// Register a new client
+    // Register a new client
     // This is part of registering a Client, outside of the scope of the RFC proper.
-    fn register_new_client(&mut self, client_data: ClientData) -> bool;
+    // fn register_new_client(&mut self, client_data: ClientData) -> bool;
 
     /// Retrieve client data
-    fn fetch_client_data(&self, client_id: String) -> Option<ClientData>;
+    fn fetch_client_data(&self, context: &mut C, client_id: String) -> Option<ClientData>;
 
     /// Store an issued authentication code, along with the client it was issued to and the
     /// redirect_uri that it was issued under.
-    fn store_client_authorization(&mut self, code: String, client_id: String,
-                                  redirect_url: Option<String>);
+    fn store_client_authorization(&mut self, context: &mut C, code: String,
+                                  client_id: String, redirect_url: Option<String>);
 
     /// Retrieve the data associated with an issued authentication code (the first field is
     /// the client id).
-    fn retrieve_client_authorization(&self, code: String) -> Option<(String, Option<String>)>;
+    fn retrieve_client_authorization(&self, context: &mut C, code: String)
+                                     -> Option<(String, Option<String>)>;
 
     /// Issue token to client, recording the issuance internally.
-    fn issue_token_to_client(&mut self, client_id: String) -> TokenData;
+    fn issue_token_to_client(&mut self, context: &mut C, client_id: String) -> TokenData;
 
     /// Handle an HTTP request at the authorization endpoint
     /// (From a user-agent, redirected by a client)
@@ -248,7 +249,8 @@ pub trait AuthzServer
     ///
     /// Refer to rfc6749 section 3.1 as to the requirements of the URL endpoint that
     /// performs this task (TLS, no fragment, support of GET with POST optional)
-    fn handle_authz_request(&self, request: Request) -> Result<AuthzRequestData, OauthError>
+    fn handle_authz_request(&self, context: &mut C, request: Request)
+                            -> Result<AuthzRequestData, OauthError>
     {
         // Get request URI, so we can get parameters out of it's query string
         let uri_string: &String = match request.uri {
@@ -304,7 +306,7 @@ pub trait AuthzServer
 
         // Verify the `client_id` matches a known client
         // (and fetch client_data for further use later on)
-        let client_data = match self.fetch_client_data(client_id.clone()) {
+        let client_data = match self.fetch_client_data(context, client_id.clone()) {
             Some(cd) => cd,
             None => {
                 // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
@@ -374,7 +376,8 @@ pub trait AuthzServer
     /// after the user-agent end user has been authenticated and has approved
     /// or denied the request.  `data` should have `authorization_code` and
     /// `error` set appropriately.
-    fn finish_authz_request(&mut self, mut data: AuthzRequestData, mut response: Response)
+    fn finish_authz_request(&mut self, context: &mut C, mut data: AuthzRequestData,
+                            mut response: Response)
                             -> Result<(), OauthError>
     {
         // Start the redirect URL
@@ -382,7 +385,7 @@ pub trait AuthzServer
             Some(ref url) => try!(Url::parse(&**url)),
             None => {
                 // Look up the client data
-                let client_data = match self.fetch_client_data(data.client_id.clone()) {
+                let client_data = match self.fetch_client_data(context, data.client_id.clone()) {
                     Some(cd) => cd,
                     None => return Err(OauthError::AuthzUnknownClient),
                 };
@@ -414,6 +417,7 @@ pub trait AuthzServer
             // associated data
             // FIXME: add a timestamp.  We are to expire these after 10 minutes.
             self.store_client_authorization(
+                context,
                 data.authorization_code.as_ref().unwrap().clone(),
                 data.client_id.clone(),
                 data.redirect_uri.clone());
@@ -445,7 +449,8 @@ pub trait AuthzServer
     ///
     /// Refer to rfc6749 section 3.2 as to the requirements of the URL endpoint that
     /// performs this task (TLS, no fragment, must use POST)
-    fn handle_token_request(&mut self, mut request: Request, mut response: Response)
+    fn handle_token_request(&mut self, context: &mut C,
+                            mut request: Request, mut response: Response)
     {
         // Start preparing the response, as we set some response data regardless
         // of success or failure.
@@ -469,7 +474,7 @@ pub trait AuthzServer
                                                Some("Authorization header failed UTF-8 check")),
             };
 
-        let client_data = match self.fetch_client_data(auth_client_id.clone()) {
+        let client_data = match self.fetch_client_data(context, auth_client_id.clone()) {
             Some(cd) => cd,
             None => token_response_fail!(response, None, TokenErrorCode::InvalidClient,
                                          Some("No such client")),
@@ -535,7 +540,7 @@ pub trait AuthzServer
         let (stored_client_id, stored_redirect_uri_opt) = match code {
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
-            Some(c) => match self.retrieve_client_authorization(c) {
+            Some(c) => match self.retrieve_client_authorization(context, c) {
                 Some(stuff) => stuff,
                 None => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                              Some("Invalid authorization code")),
@@ -564,7 +569,7 @@ pub trait AuthzServer
         }
 
         // Issue token
-        let token = self.issue_token_to_client(client_data.client_id);
+        let token = self.issue_token_to_client(context, client_data.client_id);
 
         // JSON-ify the response.
         let body = token.as_json();

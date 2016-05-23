@@ -21,7 +21,6 @@ enum InjectedFailure {
 }
 
 struct MyAuthzServer {
-    pub last_client_id: u32,
     pub registered_clients: HashMap<String, ClientData>,
     pub client_authorizations: HashMap<String, (String, Option<String>)>,
     pub failure: Option<InjectedFailure>
@@ -40,39 +39,28 @@ impl MyAuthzServer {
                   });
 
         MyAuthzServer {
-            last_client_id: 1,
             registered_clients: rc,
             client_authorizations: HashMap::new(),
             failure: failure
         }
     }
 }
-impl AuthzServer for MyAuthzServer {
-    fn generate_new_client_id(&mut self) -> String
-    {
-        self.last_client_id += 1;
-        format!("{}", self.last_client_id)
-    }
-
-    fn register_new_client(&mut self, client_data: ClientData) -> bool {
-        self.registered_clients.insert(client_data.client_id.clone(), client_data);
-        true
-    }
-
-    fn fetch_client_data(&self, client_id: String) -> Option<ClientData> {
+impl AuthzServer<()> for MyAuthzServer {
+    fn fetch_client_data(&self, _context: &mut (), client_id: String) -> Option<ClientData> {
         if self.failure == Some(InjectedFailure::NoSuchClient) {
             return None;
         }
         self.registered_clients.get(&client_id).cloned()
     }
 
-    fn store_client_authorization(&mut self, code: String, client_id: String,
+    fn store_client_authorization(&mut self, _context: &mut (), code: String, client_id: String,
                                   redirect_url: Option<String>)
     {
         self.client_authorizations.insert(code, (client_id, redirect_url));
     }
 
-    fn retrieve_client_authorization(&self, code: String) -> Option<(String, Option<String>)> {
+    fn retrieve_client_authorization(&self, _context: &mut (), code: String)
+                                     -> Option<(String, Option<String>)> {
         let &(ref client_id, ref redirect_url) = match self.client_authorizations.get(&code) {
             None => return None,
             Some(x) => x
@@ -80,7 +68,7 @@ impl AuthzServer for MyAuthzServer {
         Some((client_id.clone(), redirect_url.clone()))
     }
 
-    fn issue_token_to_client(&mut self, _client_id: String) -> TokenData {
+    fn issue_token_to_client(&mut self, _context: &mut (), _client_id: String) -> TokenData {
         let token = TextNonce::new().into_string();
         // FIXME - save this issuance somewhere and recheck it in test fn
         TokenData {
@@ -119,7 +107,7 @@ impl Handler for MyAuthzHandler {
         match url.path() {
             "/authorization" => {
                 let mut authz_server = self.authz_server.lock().unwrap();
-                match authz_server.handle_authz_request(request) {
+                match authz_server.handle_authz_request(&mut (), request) {
                     Ok(mut request_data) => {
                         if request_data.error.is_none() {
                             // NOTE: If you are following this test as example code, this is
@@ -140,14 +128,14 @@ impl Handler for MyAuthzHandler {
                                 request_data.authorization_code = Some("authorized".to_owned());
                             }
                         }
-                        let _ = authz_server.finish_authz_request(request_data, response);
+                        let _ = authz_server.finish_authz_request(&mut (), request_data, response);
                     },
                     Err(_) => self.handle_fail(response, None),
                 }
             },
             "/token" => {
                 let mut authz_server = self.authz_server.lock().unwrap();
-                authz_server.handle_token_request(request, response);
+                authz_server.handle_token_request(&mut (), request, response);
             },
             _ => self.handle_fail(response, Some(StatusCode::NotFound))
         }
