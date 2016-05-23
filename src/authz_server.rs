@@ -232,7 +232,8 @@ pub trait AuthzServer<C>
                                      -> Option<(String, Option<String>)>;
 
     /// Issue token to client, recording the issuance internally.
-    fn issue_token_to_client(&mut self, context: &mut C, client_id: String) -> TokenData;
+    fn issue_token_to_client(&mut self, context: &mut C, code: String, client_id: String)
+                             -> TokenData;
 
     /// Handle an HTTP request at the authorization endpoint
     /// (From a user-agent, redirected by a client)
@@ -540,7 +541,7 @@ pub trait AuthzServer<C>
         let (stored_client_id, stored_redirect_uri_opt) = match code {
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
-            Some(c) => match self.retrieve_client_authorization(context, c) {
+            Some(ref c) => match self.retrieve_client_authorization(context, c.clone()) {
                 Some(stuff) => stuff,
                 None => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                              Some("Invalid authorization code")),
@@ -569,7 +570,7 @@ pub trait AuthzServer<C>
         }
 
         // Issue token
-        let token = self.issue_token_to_client(context, client_data.client_id);
+        let token = self.issue_token_to_client(context, code.unwrap(), client_data.client_id);
 
         // JSON-ify the response.
         let body = token.as_json();

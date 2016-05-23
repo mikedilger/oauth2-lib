@@ -68,7 +68,9 @@ impl AuthzServer<()> for MyAuthzServer {
         Some((client_id.clone(), redirect_url.clone()))
     }
 
-    fn issue_token_to_client(&mut self, _context: &mut (), _client_id: String) -> TokenData {
+    fn issue_token_to_client(&mut self, _context: &mut (), _code: String, _client_id: String)
+                             -> TokenData
+    {
         let token = TextNonce::new().into_string();
         // FIXME - save this issuance somewhere and recheck it in test fn
         TokenData {
