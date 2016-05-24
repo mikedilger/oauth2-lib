@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["AuthzErrorCode",""],["TokenErrorCode",""]],"struct":[["AuthzError",""],["AuthzRequestData",""],["TokenData",""],["TokenError",""],["WwwAuthenticate",""]],"trait":[["AuthzServer",""]]});
+initSidebarItems({"struct":[["WwwAuthenticate",""]],"trait":[["AuthzServer",""]]});

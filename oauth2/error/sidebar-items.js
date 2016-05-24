@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["OauthError","These are errors returned to the caller"]]});
+initSidebarItems({"enum":[["OAuthError","These are errors returned to the caller"]],"trait":[["UserError","A trait for Errors produced by the consumer of this library"]]});

@@ -194,9 +194,9 @@
 <span class='kw'>use</span> <span class='ident'>url</span>::<span class='ident'>Url</span>;
 <span class='kw'>use</span> <span class='ident'>url</span>::<span class='ident'>percent_encoding</span>::{<span class='ident'>QUERY_ENCODE_SET</span>, <span class='ident'>percent_encode</span>};
 <span class='kw'>use</span> <span class='ident'>textnonce</span>::<span class='ident'>TextNonce</span>;
-<span class='kw'>use</span> {<span class='ident'>ClientData</span>, <span class='ident'>OauthError</span>, <span class='ident'>TokenData</span>, <span class='ident'>AuthzError</span>};
+<span class='kw'>use</span> {<span class='ident'>ClientData</span>, <span class='ident'>OAuthError</span>, <span class='ident'>UserError</span>, <span class='ident'>TokenData</span>, <span class='ident'>AuthzError</span>};
 
-<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Client</span>
+<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Client</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='ident'>UserError</span><span class='op'>&gt;</span>
 {
     <span class='doccomment'>/// Get own client data</span>
     <span class='kw'>fn</span> <span class='ident'>get_client_data</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>ClientData</span>;
@@ -250,12 +250,12 @@
     <span class='doccomment'>/// Refer to rfc6749 section 3.1.2 as to the requirements of this endpoint</span>
     <span class='doccomment'>/// (absolute URI, MUST NOT include fragment, MAY include query, SHOULD use TLS)</span>
     <span class='kw'>fn</span> <span class='ident'>handle_redirect_url</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>request</span>: <span class='ident'>Request</span>, <span class='ident'>authz_token_url</span>: <span class='ident'>Url</span>)
-                           <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>TokenData</span>, <span class='ident'>AuthzError</span><span class='op'>&gt;</span>, <span class='ident'>OauthError</span><span class='op'>&gt;</span>
+                           <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>TokenData</span>, <span class='ident'>AuthzError</span><span class='op'>&gt;</span>, <span class='ident'>OAuthError</span><span class='op'>&lt;</span><span class='ident'>E</span><span class='op'>&gt;&gt;</span>
     {
         <span class='comment'>// Get request URI, so we can get parameters out of it&#39;s query string</span>
         <span class='kw'>let</span> <span class='ident'>uri_string</span>: <span class='kw-2'>&amp;</span><span class='ident'>String</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>request</span>.<span class='ident'>uri</span> {
             <span class='ident'>RequestUri</span>::<span class='ident'>AbsolutePath</span>(<span class='kw-2'>ref</span> <span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
-            _ <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OauthError</span>::<span class='ident'>AuthzBadRequest</span>),
+            _ <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OAuthError</span>::<span class='ident'>AuthzBadRequest</span>),
         };
 
         <span class='comment'>// Get expected (and optional) request parameters</span>
@@ -273,16 +273,16 @@
 
         <span class='comment'>// Require code</span>
         <span class='kw'>let</span> <span class='ident'>code</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>code</span> {
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OauthError</span>::<span class='ident'>ClientCodeMissing</span>),
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OAuthError</span>::<span class='ident'>ClientCodeMissing</span>),
             <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>c</span>,
         };
 
         <span class='comment'>// Require state</span>
         <span class='kw'>match</span> <span class='ident'>state</span> {
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OauthError</span>::<span class='ident'>ClientStateMissing</span>),
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OAuthError</span>::<span class='ident'>ClientStateMissing</span>),
             <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> {
                 <span class='kw'>if</span> <span class='op'>!</span> <span class='self'>self</span>.<span class='ident'>consume_nonce</span>(<span class='ident'>s</span>) {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OauthError</span>::<span class='ident'>ClientNonceMismatch</span>);
+                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OAuthError</span>::<span class='ident'>ClientNonceMismatch</span>);
                 }
             }
         }
@@ -322,7 +322,7 @@
                 <span class='kw'>return</span> <span class='prelude-val'>Ok</span>(<span class='prelude-val'>Err</span>(<span class='ident'>authz_error</span>));
             },
             _ <span class='op'>=&gt;</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OauthError</span>::<span class='ident'>UnexpectedStatusCode</span>);
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>OAuthError</span>::<span class='ident'>UnexpectedStatusCode</span>);
             },
         }
     }

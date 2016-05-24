@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/oauth2/src/lib.rs.html#1-89' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-0' class='srclink' href='../src/oauth2/src/lib.rs.html#1-101' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>This is an OAuth 2.0 library for the Rust language.  It defines types and traits useful
 for implementing an OAuth 2.0 compliant system as specified by RFC 6749.</p>
 
@@ -55,6 +55,11 @@ for implementing an OAuth 2.0 compliant system as specified by RFC 6749.</p>
 type of OAuth 2.0 infrastructure, but is not complete, and may not be
 absolutely correct.  Please file bug reports or pull requests if you notice
 any deviation from RFC 6749, or if you have any other issues.</p>
+
+<h2>Stability Note</h2>
+
+<p>This library is still undergoing heavy upheaval.  I don&#39;t
+recommend using it yet unless you are a masochist.  -Mike, 25 May 2016</p>
 
 <h2>Applicability</h2>
 
@@ -114,8 +119,22 @@ allow.  That being said, the following limitations currently apply:</p>
 <li>FIXME: More limitations will be added to this list as the development progresses.</li>
 </ul>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
-<table><tr><td><code>pub use authz_server::{<a class='trait' href='../oauth2/authz_server/trait.AuthzServer.html' title='oauth2::authz_server::AuthzServer'>AuthzServer</a>, <a class='enum' href='../oauth2/authz_server/enum.AuthzErrorCode.html' title='oauth2::authz_server::AuthzErrorCode'>AuthzErrorCode</a>, <a class='struct' href='../oauth2/authz_server/struct.AuthzError.html' title='oauth2::authz_server::AuthzError'>AuthzError</a>, <a class='enum' href='../oauth2/authz_server/enum.TokenErrorCode.html' title='oauth2::authz_server::TokenErrorCode'>TokenErrorCode</a>, <a class='struct' href='../oauth2/authz_server/struct.TokenError.html' title='oauth2::authz_server::TokenError'>TokenError</a>, <a class='struct' href='../oauth2/authz_server/struct.AuthzRequestData.html' title='oauth2::authz_server::AuthzRequestData'>AuthzRequestData</a>, <a class='struct' href='../oauth2/authz_server/struct.TokenData.html' title='oauth2::authz_server::TokenData'>TokenData</a>};</code></td></tr><tr><td><code>pub use client::<a class='trait' href='../oauth2/client/trait.Client.html' title='oauth2::client::Client'>Client</a>;</code></td></tr><tr><td><code>pub use client_type::<a class='enum' href='../oauth2/client_type/enum.ClientType.html' title='oauth2::client_type::ClientType'>ClientType</a>;</code></td></tr><tr><td><code>pub use client_data::<a class='struct' href='../oauth2/client_data/struct.ClientData.html' title='oauth2::client_data::ClientData'>ClientData</a>;</code></td></tr><tr><td><code>pub use error::<a class='enum' href='../oauth2/error/enum.OauthError.html' title='oauth2::error::OauthError'>OauthError</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr><td><code>pub use authz_server::<a class='trait' href='../oauth2/authz_server/trait.AuthzServer.html' title='oauth2::authz_server::AuthzServer'>AuthzServer</a>;</code></td></tr><tr><td><code>pub use authz_request_data::<a class='struct' href='../oauth2/authz_request_data/struct.AuthzRequestData.html' title='oauth2::authz_request_data::AuthzRequestData'>AuthzRequestData</a>;</code></td></tr><tr><td><code>pub use authz_error::{<a class='struct' href='../oauth2/authz_error/struct.AuthzError.html' title='oauth2::authz_error::AuthzError'>AuthzError</a>, <a class='enum' href='../oauth2/authz_error/enum.AuthzErrorCode.html' title='oauth2::authz_error::AuthzErrorCode'>AuthzErrorCode</a>};</code></td></tr><tr><td><code>pub use token_data::<a class='struct' href='../oauth2/token_data/struct.TokenData.html' title='oauth2::token_data::TokenData'>TokenData</a>;</code></td></tr><tr><td><code>pub use token_error::{<a class='struct' href='../oauth2/token_error/struct.TokenError.html' title='oauth2::token_error::TokenError'>TokenError</a>, <a class='enum' href='../oauth2/token_error/enum.TokenErrorCode.html' title='oauth2::token_error::TokenErrorCode'>TokenErrorCode</a>};</code></td></tr><tr><td><code>pub use client::<a class='trait' href='../oauth2/client/trait.Client.html' title='oauth2::client::Client'>Client</a>;</code></td></tr><tr><td><code>pub use client_type::<a class='enum' href='../oauth2/client_type/enum.ClientType.html' title='oauth2::client_type::ClientType'>ClientType</a>;</code></td></tr><tr><td><code>pub use client_data::<a class='struct' href='../oauth2/client_data/struct.ClientData.html' title='oauth2::client_data::ClientData'>ClientData</a>;</code></td></tr><tr><td><code>pub use error::{<a class='enum' href='../oauth2/error/enum.OAuthError.html' title='oauth2::error::OAuthError'>OAuthError</a>, <a class='trait' href='../oauth2/error/trait.UserError.html' title='oauth2::error::UserError'>UserError</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='authz_error/index.html'
+                                  title='oauth2::authz_error'>authz_error</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='authz_request_data/index.html'
+                                  title='oauth2::authz_request_data'>authz_request_data</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='authz_server/index.html'
                                   title='oauth2::authz_server'>authz_server</a></td>
@@ -156,6 +175,20 @@ allow.  That being said, the following limitations currently apply:</p>
                                   title='oauth2::syntax'>syntax</a></td>
                            <td class='docblock short'>
                                 <p>Syntax validation for OAuth 2.0 elements</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='token_data/index.html'
+                                  title='oauth2::token_data'>token_data</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='token_error/index.html'
+                                  title='oauth2::token_error'>token_error</a></td>
+                           <td class='docblock short'>
+                                
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>

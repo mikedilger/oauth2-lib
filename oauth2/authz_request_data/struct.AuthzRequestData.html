@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `AuthzRequestData` struct in crate `oauth2`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, AuthzRequestData">
 
-    <title>oauth2::authz_server::AuthzRequestData - Rust</title>
+    <title>oauth2::authz_request_data::AuthzRequestData - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
@@ -28,7 +28,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>oauth2</a>::<wbr><a href='index.html'>authz_server</a></p><script>window.sidebarCurrent = {name: 'AuthzRequestData', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>oauth2</a>::<wbr><a href='index.html'>authz_request_data</a></p><script>window.sidebarCurrent = {name: 'AuthzRequestData', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -43,11 +43,11 @@
     </nav>
 
     <section id='main' class="content struct">
-<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>oauth2</a>::<wbr><a href='index.html'>authz_server</a>::<wbr><a class='struct' href=''>AuthzRequestData</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>oauth2</a>::<wbr><a href='index.html'>authz_request_data</a>::<wbr><a class='struct' href=''>AuthzRequestData</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-596' class='srclink' href='../../src/oauth2/src/authz_server.rs.html#119-144' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-395' class='srclink' href='../../src/oauth2/src/authz_request_data.rs.html#7-32' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct AuthzRequestData {
     pub id: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
     pub client_id: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
@@ -55,8 +55,10 @@
     pub scope: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
     pub state: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
     pub authorization_code: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;,
-    pub error: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../oauth2/authz_server/struct.AuthzError.html' title='oauth2::authz_server::AuthzError'>AuthzError</a>&gt;,
-}</pre><h2 class='fields'>Fields</h2>
+    pub error: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../oauth2/authz_error/struct.AuthzError.html' title='oauth2::authz_error::AuthzError'>AuthzError</a>&gt;,
+}</pre><div class='docblock'><p>This is the data that the client sends to the authz_server when requesting an
+authorization grant, as defined in RFC 6749 section 4.1.1</p>
+</div><h2 class='fields'>Fields</h2>
 <table><tr class='stab '>
                              <td id='structfield.id'><code>id</code></td><td><div class='docblock'><p>Some token to distinguish this request</p>
 </div></td></tr><tr class='stab '>
@@ -72,10 +74,10 @@ error if a state was not supplied in the request.</p>
                              <td id='structfield.authorization_code'><code>authorization_code</code></td><td><div class='docblock'><p>The authorization code, IF the request has been approved.</p>
 </div></td></tr><tr class='stab '>
                              <td id='structfield.error'><code>error</code></td><td><div class='docblock'><p>An error, if an error has occurred</p>
-</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../oauth2/authz_server/struct.AuthzRequestData.html' title='oauth2::authz_server::AuthzRequestData'>AuthzRequestData</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-604' class='srclink' href='../../src/oauth2/src/authz_server.rs.html#118' title='goto source code'>[src]</a></span></h3>
+</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../oauth2/authz_request_data/struct.AuthzRequestData.html' title='oauth2::authz_request_data::AuthzRequestData'>AuthzRequestData</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-403' class='srclink' href='../../src/oauth2/src/authz_request_data.rs.html#6' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-</div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../oauth2/authz_server/struct.AuthzRequestData.html' title='oauth2::authz_server::AuthzRequestData'>AuthzRequestData</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-616' class='srclink' href='../../src/oauth2/src/authz_server.rs.html#118' title='goto source code'>[src]</a></span></h3>
-<div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../oauth2/authz_server/struct.AuthzRequestData.html' title='oauth2::authz_server::AuthzRequestData'>AuthzRequestData</a></code></h4>
+</div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../oauth2/authz_request_data/struct.AuthzRequestData.html' title='oauth2::authz_request_data::AuthzRequestData'>AuthzRequestData</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-415' class='srclink' href='../../src/oauth2/src/authz_request_data.rs.html#6' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../oauth2/authz_request_data/struct.AuthzRequestData.html' title='oauth2::authz_request_data::AuthzRequestData'>AuthzRequestData</a></code></h4>
 <h4 id='method.clone_from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class="since">1.0.0</div></h4>
 </div></section>
     <section id='search' class="content hidden"></section>

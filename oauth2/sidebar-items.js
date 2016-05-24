@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["authz_server",""],["client",""],["client_data",""],["client_type",""],["error",""],["syntax","Syntax validation for OAuth 2.0 elements"]]});
+initSidebarItems({"mod":[["authz_error",""],["authz_request_data",""],["authz_server",""],["client",""],["client_data",""],["client_type",""],["error",""],["syntax","Syntax validation for OAuth 2.0 elements"],["token_data",""],["token_error",""]]});
