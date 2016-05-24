@@ -6,8 +6,10 @@ extern crate textnonce;
 
 use std::sync::{Arc, Mutex};
 use std::collections::{HashMap, HashSet};
+use std::error::Error as StdError;
+use std::fmt;
 use oauth2::{ClientData, AuthzServer, TokenData, Client, ClientType,
-             AuthzError, AuthzErrorCode, AuthzRequestData};
+             AuthzError, AuthzErrorCode, AuthzRequestData, UserError, OAuthError};
 use hyper::server::{Handler, Request, Response};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri;
@@ -19,6 +21,24 @@ enum InjectedFailure {
     NotAuthorized,
     NoSuchClient,
 }
+
+// Dummied up error type
+#[derive(Debug)]
+struct MyError(String);
+impl StdError for MyError {
+    fn description(&self) -> &str {
+        "error"
+    }
+    fn cause(&self) -> Option<&StdError> {
+        None
+    }
+}
+impl fmt::Display for MyError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+impl UserError for MyError { }
 
 struct MyAuthzServer {
     pub registered_clients: HashMap<String, ClientData>,
@@ -45,37 +65,42 @@ impl MyAuthzServer {
         }
     }
 }
-impl AuthzServer<()> for MyAuthzServer {
-    fn fetch_client_data(&self, _context: &mut (), client_id: String) -> Option<ClientData> {
+impl AuthzServer<(),MyError> for MyAuthzServer {
+    fn fetch_client_data(&self, _context: &mut (), client_id: String)
+                         -> Result<Option<ClientData>, OAuthError<MyError>>
+    {
         if self.failure == Some(InjectedFailure::NoSuchClient) {
-            return None;
+            return Ok(None);
         }
-        self.registered_clients.get(&client_id).cloned()
+        Ok(self.registered_clients.get(&client_id).cloned())
     }
 
     fn store_client_authorization(&mut self, _context: &mut (), data: AuthzRequestData)
+        -> Result<(), OAuthError<MyError>>
     {
         let code = data.authorization_code.as_ref().unwrap().clone();
         self.client_authorizations.insert(code, data);
+        Ok(())
     }
 
     fn retrieve_client_authorization(&self, _context: &mut (), code: String)
-                                     -> Option<AuthzRequestData> {
-        self.client_authorizations.get(&code).cloned()
+                                     -> Result<Option<AuthzRequestData>, OAuthError<MyError>>
+    {
+        Ok(self.client_authorizations.get(&code).cloned())
     }
 
     fn issue_token_to_client(&mut self, _context: &mut (), _code: String, _client_id: String)
-                             -> TokenData
+                             -> Result<TokenData, OAuthError<MyError>>
     {
         let token = TextNonce::new().into_string();
         // FIXME - save this issuance somewhere and recheck it in test fn
-        TokenData {
+        Ok(TokenData {
             access_token: token,
             token_type: "bearer".to_owned(),
             expires_in: None,
             refresh_token: None,
             scope: None,
-        }
+        })
     }
 }
 
@@ -161,7 +186,7 @@ impl MyClient {
         }
     }
 }
-impl Client for MyClient {
+impl Client<MyError> for MyClient {
     fn get_client_data<'a>(&'a self) -> &'a ClientData
     {
         &self.client_data

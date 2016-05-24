@@ -58,16 +58,17 @@ pub trait AuthzServer<C, E: UserError>
     /// Store an issued authentication code, along with the request data associated with
     /// it (in particular, the client_id it was issued to and the redirect_uri that it was
     /// issued under, and any scope if that applies).
-    fn store_client_authorization(&mut self, context: &mut C, data: AuthzRequestData);
+    fn store_client_authorization(&mut self, context: &mut C, data: AuthzRequestData)
+                                  -> Result<(), OAuthError<E>>;
 
     /// Retrieve the data associated with an issued authentication code (the first field is
     /// the client id).
     fn retrieve_client_authorization(&self, context: &mut C, code: String)
-                                     -> Option<AuthzRequestData>;
+                                     -> Result<Option<AuthzRequestData>, OAuthError<E>>;
 
     /// Issue token to client, recording the issuance internally.
     fn issue_token_to_client(&mut self, context: &mut C, code: String, client_id: String)
-                             -> TokenData;
+                             -> Result<TokenData, OAuthError<E>>;
 
     /// Handle an HTTP request at the authorization endpoint
     /// (From a user-agent, redirected by a client)
@@ -254,9 +255,9 @@ pub trait AuthzServer<C, E: UserError>
             // Remember that we issued this code, so the token endpoint can get and check
             // associated data
             // FIXME: add a timestamp.  We are to expire these after 10 minutes.
-            self.store_client_authorization(
+            try!(self.store_client_authorization(
                 context,
-                data.clone());
+                data.clone()));
 
             // Put the code into the redirect url
             let auth_code = data.authorization_code.unwrap();
@@ -382,9 +383,9 @@ pub trait AuthzServer<C, E: UserError>
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
             Some(ref c) => match self.retrieve_client_authorization(context, c.clone()) {
-                Some(stuff) => stuff,
-                None => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
-                                             Some("Invalid authorization code")),
+                Ok(Some(stuff)) => stuff,
+                _ => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
+                                          Some("Invalid authorization code")),
             }
         };
 
@@ -409,7 +410,12 @@ pub trait AuthzServer<C, E: UserError>
         }
 
         // Issue token
-        let token = self.issue_token_to_client(context, code.unwrap(), client_data.client_id);
+        let token = match self.issue_token_to_client(context, code.unwrap(),
+                                                     client_data.client_id) {
+            Ok(t) => t,
+            Err(_) => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
+                                           None),
+        };
 
         // JSON-ify the response.
         let body = token.as_json();
