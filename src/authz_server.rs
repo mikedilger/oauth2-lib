@@ -41,8 +41,19 @@ macro_rules! token_response_fail {
 
 pub trait AuthzServer<C, E: UserError>
 {
-    /// Retrieve client data
-    fn fetch_client_data(&self, context: &mut C, client_id: String) -> Option<ClientData>;
+    /// Fetch data about a registered OAuth 2.0 client (clients are the other websites
+    /// which are trying to login to your website on behalf of the user, and should have
+    /// been registered with your site ahead of time).
+    ///
+    /// Should return Ok(Some(ClientData)) if found, Ok(None) if not found, and
+    /// Err(OAuthError<E>) on error.
+    ///
+    /// `context` comes from whatever you pass into `handle_authz_request()`,
+    /// `finish_authz_request()` or `handle_token_request()`
+    fn fetch_client_data(&self, context: &mut C, client_id: String)
+                         -> Result<Option<ClientData>, OAuthError<E>>;
+
+    /// If an authorization grant has succeeded, this will be called to store
 
     /// Store an issued authentication code, along with the request data associated with
     /// it (in particular, the client_id it was issued to and the redirect_uri that it was
@@ -130,7 +141,8 @@ pub trait AuthzServer<C, E: UserError>
 
         // Verify the `client_id` matches a known client
         // (and fetch client_data for further use later on)
-        let client_data = match self.fetch_client_data(context, client_id.clone()) {
+        let client_data = match try!(self.fetch_client_data(context, client_id.clone()))
+        {
             Some(cd) => cd,
             None => {
                 // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
@@ -209,7 +221,9 @@ pub trait AuthzServer<C, E: UserError>
             Some(ref url) => try!(Url::parse(&**url)),
             None => {
                 // Look up the client data
-                let client_data = match self.fetch_client_data(context, data.client_id.clone()) {
+                let client_data = match try!(self.fetch_client_data(
+                    context, data.client_id.clone()))
+                {
                     Some(cd) => cd,
                     None => return Err(OAuthError::AuthzUnknownClient),
                 };
@@ -297,10 +311,15 @@ pub trait AuthzServer<C, E: UserError>
             };
 
         let client_data = match self.fetch_client_data(context, auth_client_id.clone()) {
-            Some(cd) => cd,
-            None => token_response_fail!(response, None, TokenErrorCode::InvalidClient,
-                                         Some("No such client")),
+            Err(_) => token_response_fail!(response, None, TokenErrorCode::InvalidClient,
+                                           Some("No such client")),
+            Ok(v) => match v {
+                Some(cd) => cd,
+                None => token_response_fail!(response, None, TokenErrorCode::InvalidClient,
+                                             Some("No such client")),
+            }
         };
+
         if authz_credentials != client_data.credentials {
             response.headers_mut().set(WwwAuthenticate("Basic".to_owned()));
             token_response_fail!(response, Some(StatusCode::Unauthorized),
