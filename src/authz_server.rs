@@ -41,14 +41,6 @@ macro_rules! token_response_fail {
 
 pub trait AuthzServer<C, E: UserError>
 {
-    // Generate a new, unique, `ClientID`
-    // This is part of registering a Client, outside of the scope of the RFC proper.
-    // fn generate_new_client_id(&mut self) -> String;
-
-    // Register a new client
-    // This is part of registering a Client, outside of the scope of the RFC proper.
-    // fn register_new_client(&mut self, client_data: ClientData) -> bool;
-
     /// Retrieve client data
     fn fetch_client_data(&self, context: &mut C, client_id: String) -> Option<ClientData>;
 
