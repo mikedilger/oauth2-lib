@@ -8,7 +8,7 @@ use std::fmt;
 
 /// These are errors returned to the caller
 #[derive(Debug)]
-pub enum OauthError {
+pub enum OAuthError {
     Utf8Error(Utf8Error),
     FromUtf8Error(FromUtf8Error),
     Url(::url::ParseError),
@@ -25,70 +25,70 @@ pub enum OauthError {
     UnexpectedStatusCode
 }
 
-impl fmt::Display for OauthError {
+impl fmt::Display for OAuthError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
     {
         match *self {
-            OauthError::Utf8Error(ref e) => e.fmt(f),
-            OauthError::FromUtf8Error(ref e) => e.fmt(f),
-            OauthError::Url(ref e) => e.fmt(f),
-            OauthError::Io(ref e) => e.fmt(f),
+            OAuthError::Utf8Error(ref e) => e.fmt(f),
+            OAuthError::FromUtf8Error(ref e) => e.fmt(f),
+            OAuthError::Url(ref e) => e.fmt(f),
+            OAuthError::Io(ref e) => e.fmt(f),
             ref e => write!(f, "{}", e.description()),
         }
     }
 }
 
-impl StdError for OauthError {
+impl StdError for OAuthError {
     fn description(&self) -> &str {
         match *self {
-            OauthError::Utf8Error(_) => "UTF-8 Decoding Error",
-            OauthError::FromUtf8Error(_) => "UTF-8 Decoding Error",
-            OauthError::Url(_) => "URL Format Error",
-            OauthError::Io(_) => "I/O Error",
-            OauthError::AuthzBadRequest => "Bad Request",
-            OauthError::AuthzMissingClientId => "Missing `client_id`",
-            OauthError::AuthzUnknownClient => "Unknown Client",
-            OauthError::AuthzRedirectUrlNotRegistered => "`redirect_url` Not Registered",
-            OauthError::AuthzGrantTypeMissing => "`grant_type` Missing",
-            OauthError::AuthzClientIdMismatch => "`client_id` mismatch",
-            OauthError::ClientCodeMissing => "`code` Missing",
-            OauthError::ClientStateMissing => "`state` Missing",
-            OauthError::ClientNonceMismatch => "`nonce` Mismatch",
-            OauthError::UnexpectedStatusCode => "Unexpected HTTP Status Code",
+            OAuthError::Utf8Error(_) => "UTF-8 Decoding Error",
+            OAuthError::FromUtf8Error(_) => "UTF-8 Decoding Error",
+            OAuthError::Url(_) => "URL Format Error",
+            OAuthError::Io(_) => "I/O Error",
+            OAuthError::AuthzBadRequest => "Bad Request",
+            OAuthError::AuthzMissingClientId => "Missing `client_id`",
+            OAuthError::AuthzUnknownClient => "Unknown Client",
+            OAuthError::AuthzRedirectUrlNotRegistered => "`redirect_url` Not Registered",
+            OAuthError::AuthzGrantTypeMissing => "`grant_type` Missing",
+            OAuthError::AuthzClientIdMismatch => "`client_id` mismatch",
+            OAuthError::ClientCodeMissing => "`code` Missing",
+            OAuthError::ClientStateMissing => "`state` Missing",
+            OAuthError::ClientNonceMismatch => "`nonce` Mismatch",
+            OAuthError::UnexpectedStatusCode => "Unexpected HTTP Status Code",
         }
     }
 
     fn cause(&self) -> Option<&StdError> {
         match *self {
-            OauthError::Utf8Error(ref e) => Some(e),
-            OauthError::FromUtf8Error(ref e) => Some(e),
-            OauthError::Url(ref e) => Some(e),
-            OauthError::Io(ref e) => Some(e),
+            OAuthError::Utf8Error(ref e) => Some(e),
+            OAuthError::FromUtf8Error(ref e) => Some(e),
+            OAuthError::Url(ref e) => Some(e),
+            OAuthError::Io(ref e) => Some(e),
             _ => None,
         }
     }
 }
 
-impl From<Utf8Error> for OauthError {
-    fn from(e: Utf8Error) -> OauthError {
-        OauthError::Utf8Error(e)
+impl From<Utf8Error> for OAuthError {
+    fn from(e: Utf8Error) -> OAuthError {
+        OAuthError::Utf8Error(e)
     }
 }
 
-impl From<FromUtf8Error> for OauthError {
-    fn from(e: FromUtf8Error) -> OauthError {
-        OauthError::FromUtf8Error(e)
+impl From<FromUtf8Error> for OAuthError {
+    fn from(e: FromUtf8Error) -> OAuthError {
+        OAuthError::FromUtf8Error(e)
     }
 }
 
-impl From<::url::ParseError> for OauthError {
-    fn from(e: ::url::ParseError) -> OauthError {
-        OauthError::Url(e)
+impl From<::url::ParseError> for OAuthError {
+    fn from(e: ::url::ParseError) -> OAuthError {
+        OAuthError::Url(e)
     }
 }
 
-impl From<IoError> for OauthError {
-    fn from(e: IoError) -> OauthError {
-        OauthError::Io(e)
+impl From<IoError> for OAuthError {
+    fn from(e: IoError) -> OAuthError {
+        OAuthError::Io(e)
     }
 }

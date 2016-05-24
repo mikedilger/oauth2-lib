@@ -6,7 +6,7 @@ use hyper::header::{Authorization, Basic, Location, ContentType, CacheDirective,
                     Pragma};
 use hyper::status::StatusCode;
 use url::Url;
-use {ClientData, OauthError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
+use {ClientData, OAuthError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
      AuthzRequestData, TokenData};
 
 
@@ -82,7 +82,7 @@ pub trait AuthzServer<C>
     /// Refer to rfc6749 section 3.1 as to the requirements of the URL endpoint that
     /// performs this task (TLS, no fragment, support of GET with POST optional)
     fn handle_authz_request(&self, context: &mut C, request: Request)
-                            -> Result<AuthzRequestData, OauthError>
+                            -> Result<AuthzRequestData, OAuthError>
     {
         // Get request URI, so we can get parameters out of it's query string
         let uri_string: &String = match request.uri {
@@ -91,7 +91,7 @@ pub trait AuthzServer<C>
                 // rfc6749, section 4.1.2.1 paragraph 1, instructs us to redirect onwards
                 // with error = 'invalid_request', but since we cannot get parameters out
                 // of such a bad request, we have to fail early.
-                return Err(OauthError::AuthzBadRequest);
+                return Err(OAuthError::AuthzBadRequest);
             },
         };
 
@@ -131,7 +131,7 @@ pub trait AuthzServer<C>
                 // identifier is missing or invalid, the authorization server SHOULD
                 // inform the resource owner of the error and MUST NOT automatically
                 // redirect the user-agent to the invalid redirection URI.
-                return Err(OauthError::AuthzMissingClientId);
+                return Err(OAuthError::AuthzMissingClientId);
             },
             Some(cid) => cid
         };
@@ -146,7 +146,7 @@ pub trait AuthzServer<C>
                 // identifier is missing or invalid, the authorization server SHOULD
                 // inform the resource owner of the error and MUST NOT automatically
                 // redirect the user-agent to the invalid redirection URI.
-                return Err(OauthError::AuthzUnknownClient);
+                return Err(OAuthError::AuthzUnknownClient);
             },
         };
 
@@ -187,7 +187,7 @@ pub trait AuthzServer<C>
                     // identifier is missing or invalid, the authorization server SHOULD
                     // inform the resource owner of the error and MUST NOT automatically
                     // redirect the user-agent to the invalid redirection URI.
-                    return Err(OauthError::AuthzRedirectUrlNotRegistered);
+                    return Err(OAuthError::AuthzRedirectUrlNotRegistered);
                 }
                 Some(ruri)
             }
@@ -210,7 +210,7 @@ pub trait AuthzServer<C>
     /// `error` set appropriately.
     fn finish_authz_request(&mut self, context: &mut C, mut data: AuthzRequestData,
                             mut response: Response)
-                            -> Result<(), OauthError>
+                            -> Result<(), OAuthError>
     {
         // Start the redirect URL
         let mut url = match data.redirect_uri {
@@ -219,7 +219,7 @@ pub trait AuthzServer<C>
                 // Look up the client data
                 let client_data = match self.fetch_client_data(context, data.client_id.clone()) {
                     Some(cd) => cd,
-                    None => return Err(OauthError::AuthzUnknownClient),
+                    None => return Err(OAuthError::AuthzUnknownClient),
                 };
                 // Use the first registered redirect_uri
                 try!(Url::parse(&client_data.redirect_uri[0]))

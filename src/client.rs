@@ -7,7 +7,7 @@ use hyper::header::{Location, Authorization, Basic};
 use url::Url;
 use url::percent_encoding::{QUERY_ENCODE_SET, percent_encode};
 use textnonce::TextNonce;
-use {ClientData, OauthError, TokenData, AuthzError};
+use {ClientData, OAuthError, TokenData, AuthzError};
 
 pub trait Client
 {
@@ -63,12 +63,12 @@ pub trait Client
     /// Refer to rfc6749 section 3.1.2 as to the requirements of this endpoint
     /// (absolute URI, MUST NOT include fragment, MAY include query, SHOULD use TLS)
     fn handle_redirect_url(&mut self, request: Request, authz_token_url: Url)
-                           -> Result<Result<TokenData, AuthzError>, OauthError>
+                           -> Result<Result<TokenData, AuthzError>, OAuthError>
     {
         // Get request URI, so we can get parameters out of it's query string
         let uri_string: &String = match request.uri {
             RequestUri::AbsolutePath(ref s) => s,
-            _ => return Err(OauthError::AuthzBadRequest),
+            _ => return Err(OAuthError::AuthzBadRequest),
         };
 
         // Get expected (and optional) request parameters
@@ -86,16 +86,16 @@ pub trait Client
 
         // Require code
         let code = match code {
-            None => return Err(OauthError::ClientCodeMissing),
+            None => return Err(OAuthError::ClientCodeMissing),
             Some(c) => c,
         };
 
         // Require state
         match state {
-            None => return Err(OauthError::ClientStateMissing),
+            None => return Err(OAuthError::ClientStateMissing),
             Some(s) => {
                 if ! self.consume_nonce(s) {
-                    return Err(OauthError::ClientNonceMismatch);
+                    return Err(OAuthError::ClientNonceMismatch);
                 }
             }
         }
@@ -135,7 +135,7 @@ pub trait Client
                 return Ok(Err(authz_error));
             },
             _ => {
-                return Err(OauthError::UnexpectedStatusCode);
+                return Err(OAuthError::UnexpectedStatusCode);
             },
         }
     }
