@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error as StdError;
 use std::fmt;
 use oauth2::{ClientData, AuthzServer, TokenData, Client, ClientType,
-             AuthzError, AuthzErrorCode, AuthzRequestData, UserError, OAuthError};
+             AuthzError, AuthzErrorCode, AuthzRequest, UserError, OAuthError};
 use hyper::server::{Handler, Request, Response};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri;
@@ -42,7 +42,7 @@ impl UserError for MyError { }
 
 struct MyAuthzServer {
     pub registered_clients: HashMap<String, ClientData>,
-    pub client_authorizations: HashMap<String, AuthzRequestData>,
+    pub client_authorizations: HashMap<String, AuthzRequest>,
     pub failure: Option<InjectedFailure>
 }
 impl MyAuthzServer {
@@ -75,16 +75,16 @@ impl AuthzServer<(),MyError> for MyAuthzServer {
         Ok(self.registered_clients.get(&client_id).cloned())
     }
 
-    fn store_client_authorization(&mut self, _context: &mut (), data: AuthzRequestData)
+    fn store_client_authorization(&mut self, _context: &mut (), request: AuthzRequest)
         -> Result<(), OAuthError<MyError>>
     {
-        let code = data.authorization_code.as_ref().unwrap().clone();
-        self.client_authorizations.insert(code, data);
+        let code = request.authorization_code.as_ref().unwrap().clone();
+        self.client_authorizations.insert(code, request);
         Ok(())
     }
 
     fn retrieve_client_authorization(&self, _context: &mut (), code: String)
-                                     -> Result<Option<AuthzRequestData>, OAuthError<MyError>>
+                                     -> Result<Option<AuthzRequest>, OAuthError<MyError>>
     {
         Ok(self.client_authorizations.get(&code).cloned())
     }

@@ -7,7 +7,7 @@ use hyper::header::{Authorization, Basic, Location, ContentType, CacheDirective,
 use hyper::status::StatusCode;
 use url::Url;
 use {ClientData, OAuthError, UserError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
-     AuthzRequestData, TokenData};
+     AuthzRequest, TokenData};
 
 
 header! { (WwwAuthenticate, "WWW-Authenticate") => [String] }
@@ -58,13 +58,13 @@ pub trait AuthzServer<C, E: UserError>
     /// Store an issued authentication code, along with the request data associated with
     /// it (in particular, the client_id it was issued to and the redirect_uri that it was
     /// issued under, and any scope if that applies).
-    fn store_client_authorization(&mut self, context: &mut C, data: AuthzRequestData)
+    fn store_client_authorization(&mut self, context: &mut C, request: AuthzRequest)
                                   -> Result<(), OAuthError<E>>;
 
     /// Retrieve the data associated with an issued authentication code (the first field is
     /// the client id).
     fn retrieve_client_authorization(&self, context: &mut C, code: String)
-                                     -> Result<Option<AuthzRequestData>, OAuthError<E>>;
+                                     -> Result<Option<AuthzRequest>, OAuthError<E>>;
 
     /// Issue token to client, recording the issuance internally.
     fn issue_token_to_client(&mut self, context: &mut C, code: String, client_id: String)
@@ -86,7 +86,7 @@ pub trait AuthzServer<C, E: UserError>
     /// Refer to rfc6749 section 3.1 as to the requirements of the URL endpoint that
     /// performs this task (TLS, no fragment, support of GET with POST optional)
     fn handle_authz_request(&self, context: &mut C, request: Request)
-                            -> Result<AuthzRequestData, OAuthError<E>>
+                            -> Result<AuthzRequest, OAuthError<E>>
     {
         // Get request URI, so we can get parameters out of it's query string
         let uri_string: &String = match request.uri {
@@ -198,7 +198,7 @@ pub trait AuthzServer<C, E: UserError>
             }
         };
 
-        Ok(AuthzRequestData {
+        Ok(AuthzRequest {
             id: None,
             client_id: client_id,
             redirect_uri: redirect_uri,
@@ -213,17 +213,17 @@ pub trait AuthzServer<C, E: UserError>
     /// after the user-agent end user has been authenticated and has approved
     /// or denied the request.  `data` should have `authorization_code` and
     /// `error` set appropriately.
-    fn finish_authz_request(&mut self, context: &mut C, mut data: AuthzRequestData,
+    fn finish_authz_request(&mut self, context: &mut C, mut request: AuthzRequest,
                             mut response: Response)
                             -> Result<(), OAuthError<E>>
     {
         // Start the redirect URL
-        let mut url = match data.redirect_uri {
+        let mut url = match request.redirect_uri {
             Some(ref url) => try!(Url::parse(&**url)),
             None => {
                 // Look up the client data
                 let client_data = match try!(self.fetch_client_data(
-                    context, data.client_id.clone()))
+                    context, request.client_id.clone()))
                 {
                     Some(cd) => cd,
                     None => return Err(OAuthError::AuthzUnknownClient),
@@ -234,44 +234,44 @@ pub trait AuthzServer<C, E: UserError>
         };
 
         // Make sure authorization_code and error are in sync
-        if data.authorization_code.is_none() && data.error.is_none() {
+        if request.authorization_code.is_none() && request.error.is_none() {
             // Not authorized, but no error set.  Set the error
-            data.error = Some(AuthzError {
+            request.error = Some(AuthzError {
                 error: AuthzErrorCode::UnauthorizedClient,
                 error_description: None,
                 error_uri: None,
-                state: match data.state {
+                state: match request.state {
                     None => None,
                     Some(ref state) => Some(state.clone()),
                 },
             });
         }
-        if data.authorization_code.is_some() && data.error.is_some() {
+        if request.authorization_code.is_some() && request.error.is_some() {
             // code AND error were specified.  To be safe, drop the code.
-            data.authorization_code = None;
+            request.authorization_code = None;
         }
 
-        if data.error.is_none() {
+        if request.error.is_none() {
             // Remember that we issued this code, so the token endpoint can get and check
             // associated data
             // FIXME: add a timestamp.  We are to expire these after 10 minutes.
             try!(self.store_client_authorization(
                 context,
-                data.clone()));
+                request.clone()));
 
             // Put the code into the redirect url
-            let auth_code = data.authorization_code.unwrap();
+            let auth_code = request.authorization_code.unwrap();
             url.query_pairs_mut()
                 .append_pair("code", &*auth_code);
 
-            if let Some(ref s) = data.state {
+            if let Some(ref s) = request.state {
                 url.query_pairs_mut()
                     .append_pair("state", s);
             }
         }
         else { //
             // Put error details into redirect url
-            data.error.as_ref().unwrap().put_into_query_string(&mut url);
+            request.error.as_ref().unwrap().put_into_query_string(&mut url);
         }
 
         response.headers_mut().set(Location(url.into_string()));
@@ -379,7 +379,7 @@ pub trait AuthzServer<C, E: UserError>
         // Require code, and retrieve the data we issued with the code
         // This also verifies that the code is valid, and was issued to the
         // client in question.
-        let authz_request_data = match code {
+        let authz_request = match code {
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
             Some(ref c) => match self.retrieve_client_authorization(context, c.clone()) {
@@ -390,19 +390,19 @@ pub trait AuthzServer<C, E: UserError>
         };
 
         // Verify the client_id matches
-        if authz_request_data.client_id != client_data.client_id {
+        if authz_request.client_id != client_data.client_id {
             // FIXME: also delete the stored code and related tokens.
             token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                  Some("client_id mismatch"));
         }
 
         // Verify the redirect_uri matches, if it was used originally
-        if authz_request_data.redirect_uri.is_some() {
+        if authz_request.redirect_uri.is_some() {
             match redirect_uri {
                 None => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                              Some("redirect_uri parameter must be \
                                                    supplied in body")),
-                Some(ru) => if &ru != authz_request_data.redirect_uri.as_ref().unwrap() {
+                Some(ru) => if &ru != authz_request.redirect_uri.as_ref().unwrap() {
                     token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                          Some("redirect_uri parameter mismatch"));
                 }

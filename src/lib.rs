@@ -81,7 +81,7 @@ extern crate serde_json;
 
 pub mod syntax;
 pub mod authz_server;
-pub mod authz_request_data;
+pub mod authz_request;
 pub mod authz_error;
 pub mod token_data;
 pub mod token_error;
@@ -91,7 +91,7 @@ pub mod client_data;
 pub mod error;
 
 pub use authz_server::AuthzServer;
-pub use authz_request_data::AuthzRequestData;
+pub use authz_request::AuthzRequest;
 pub use authz_error::{AuthzError, AuthzErrorCode};
 pub use token_data::TokenData;
 pub use token_error::{TokenError, TokenErrorCode};

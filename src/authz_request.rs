@@ -4,7 +4,7 @@ use AuthzError;
 /// This is the data that the client sends to the authz_server when requesting an
 /// authorization grant, as defined in RFC 6749 section 4.1.1
 #[derive(Clone, Debug)]
-pub struct AuthzRequestData {
+pub struct AuthzRequest {
     /// Some token to distinguish this request
     pub id: Option<String>,
 
