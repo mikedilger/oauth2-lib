@@ -1,6 +1,6 @@
 [package]
 name = "oauth2-lib"
-version = "0.3.0"
+version = "0.4.0"
 description = "OAuth 2.0 library for supporting clients and servers"
 authors = [
         "Mike Dilger <mike@optcomp.nz>"
