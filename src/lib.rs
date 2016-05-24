@@ -93,4 +93,4 @@ pub use token_error::{TokenError, TokenErrorCode};
 pub use client::Client;
 pub use client_type::ClientType;
 pub use client_data::ClientData;
-pub use error::OAuthError;
+pub use error::{OAuthError, UserError};

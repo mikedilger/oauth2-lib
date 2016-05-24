@@ -6,7 +6,7 @@ use hyper::header::{Authorization, Basic, Location, ContentType, CacheDirective,
                     Pragma};
 use hyper::status::StatusCode;
 use url::Url;
-use {ClientData, OAuthError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
+use {ClientData, OAuthError, UserError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
      AuthzRequestData, TokenData};
 
 
@@ -39,7 +39,7 @@ macro_rules! token_response_fail {
     };
 }
 
-pub trait AuthzServer<C>
+pub trait AuthzServer<C, E: UserError>
 {
     // Generate a new, unique, `ClientID`
     // This is part of registering a Client, outside of the scope of the RFC proper.
@@ -82,7 +82,7 @@ pub trait AuthzServer<C>
     /// Refer to rfc6749 section 3.1 as to the requirements of the URL endpoint that
     /// performs this task (TLS, no fragment, support of GET with POST optional)
     fn handle_authz_request(&self, context: &mut C, request: Request)
-                            -> Result<AuthzRequestData, OAuthError>
+                            -> Result<AuthzRequestData, OAuthError<E>>
     {
         // Get request URI, so we can get parameters out of it's query string
         let uri_string: &String = match request.uri {
@@ -210,7 +210,7 @@ pub trait AuthzServer<C>
     /// `error` set appropriately.
     fn finish_authz_request(&mut self, context: &mut C, mut data: AuthzRequestData,
                             mut response: Response)
-                            -> Result<(), OAuthError>
+                            -> Result<(), OAuthError<E>>
     {
         // Start the redirect URL
         let mut url = match data.redirect_uri {

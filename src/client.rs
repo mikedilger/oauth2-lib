@@ -7,9 +7,9 @@ use hyper::header::{Location, Authorization, Basic};
 use url::Url;
 use url::percent_encoding::{QUERY_ENCODE_SET, percent_encode};
 use textnonce::TextNonce;
-use {ClientData, OAuthError, TokenData, AuthzError};
+use {ClientData, OAuthError, UserError, TokenData, AuthzError};
 
-pub trait Client
+pub trait Client<E: UserError>
 {
     /// Get own client data
     fn get_client_data<'a>(&'a self) -> &'a ClientData;
@@ -63,7 +63,7 @@ pub trait Client
     /// Refer to rfc6749 section 3.1.2 as to the requirements of this endpoint
     /// (absolute URI, MUST NOT include fragment, MAY include query, SHOULD use TLS)
     fn handle_redirect_url(&mut self, request: Request, authz_token_url: Url)
-                           -> Result<Result<TokenData, AuthzError>, OAuthError>
+                           -> Result<Result<TokenData, AuthzError>, OAuthError<E>>
     {
         // Get request URI, so we can get parameters out of it's query string
         let uri_string: &String = match request.uri {
