@@ -221,15 +221,15 @@ pub trait AuthzServer<C>
     /// Retrieve client data
     fn fetch_client_data(&self, context: &mut C, client_id: String) -> Option<ClientData>;
 
-    /// Store an issued authentication code, along with the client it was issued to and the
-    /// redirect_uri that it was issued under.
-    fn store_client_authorization(&mut self, context: &mut C, code: String,
-                                  client_id: String, redirect_url: Option<String>);
+    /// Store an issued authentication code, along with the request data associated with
+    /// it (in particular, the client_id it was issued to and the redirect_uri that it was
+    /// issued under, and any scope if that applies).
+    fn store_client_authorization(&mut self, context: &mut C, data: AuthzRequestData);
 
     /// Retrieve the data associated with an issued authentication code (the first field is
     /// the client id).
     fn retrieve_client_authorization(&self, context: &mut C, code: String)
-                                     -> Option<(String, Option<String>)>;
+                                     -> Option<AuthzRequestData>;
 
     /// Issue token to client, recording the issuance internally.
     fn issue_token_to_client(&mut self, context: &mut C, code: String, client_id: String)
@@ -419,9 +419,7 @@ pub trait AuthzServer<C>
             // FIXME: add a timestamp.  We are to expire these after 10 minutes.
             self.store_client_authorization(
                 context,
-                data.authorization_code.as_ref().unwrap().clone(),
-                data.client_id.clone(),
-                data.redirect_uri.clone());
+                data.clone());
 
             // Put the code into the redirect url
             let auth_code = data.authorization_code.unwrap();
@@ -538,7 +536,7 @@ pub trait AuthzServer<C>
         // Require code, and retrieve the data we issued with the code
         // This also verifies that the code is valid, and was issued to the
         // client in question.
-        let (stored_client_id, stored_redirect_uri_opt) = match code {
+        let authz_request_data = match code {
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
             Some(ref c) => match self.retrieve_client_authorization(context, c.clone()) {
@@ -549,20 +547,19 @@ pub trait AuthzServer<C>
         };
 
         // Verify the client_id matches
-        if stored_client_id != client_data.client_id {
+        if authz_request_data.client_id != client_data.client_id {
             // FIXME: also delete the stored code and related tokens.
             token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                  Some("client_id mismatch"));
         }
 
         // Verify the redirect_uri matches, if it was used originally
-        if stored_redirect_uri_opt.is_some() {
-            let stored_redirect_uri = stored_redirect_uri_opt.unwrap();
+        if authz_request_data.redirect_uri.is_some() {
             match redirect_uri {
                 None => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                              Some("redirect_uri parameter must be \
                                                    supplied in body")),
-                Some(ru) => if ru != stored_redirect_uri {
+                Some(ru) => if &ru != authz_request_data.redirect_uri.as_ref().unwrap() {
                     token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                          Some("redirect_uri parameter mismatch"));
                 }

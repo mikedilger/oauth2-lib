@@ -7,7 +7,7 @@ extern crate textnonce;
 use std::sync::{Arc, Mutex};
 use std::collections::{HashMap, HashSet};
 use oauth2::{ClientData, AuthzServer, TokenData, Client, ClientType,
-             AuthzError, AuthzErrorCode};
+             AuthzError, AuthzErrorCode, AuthzRequestData};
 use hyper::server::{Handler, Request, Response};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri;
@@ -22,7 +22,7 @@ enum InjectedFailure {
 
 struct MyAuthzServer {
     pub registered_clients: HashMap<String, ClientData>,
-    pub client_authorizations: HashMap<String, (String, Option<String>)>,
+    pub client_authorizations: HashMap<String, AuthzRequestData>,
     pub failure: Option<InjectedFailure>
 }
 impl MyAuthzServer {
@@ -53,19 +53,15 @@ impl AuthzServer<()> for MyAuthzServer {
         self.registered_clients.get(&client_id).cloned()
     }
 
-    fn store_client_authorization(&mut self, _context: &mut (), code: String, client_id: String,
-                                  redirect_url: Option<String>)
+    fn store_client_authorization(&mut self, _context: &mut (), data: AuthzRequestData)
     {
-        self.client_authorizations.insert(code, (client_id, redirect_url));
+        let code = data.authorization_code.as_ref().unwrap().clone();
+        self.client_authorizations.insert(code, data);
     }
 
     fn retrieve_client_authorization(&self, _context: &mut (), code: String)
-                                     -> Option<(String, Option<String>)> {
-        let &(ref client_id, ref redirect_url) = match self.client_authorizations.get(&code) {
-            None => return None,
-            Some(x) => x
-        };
-        Some((client_id.clone(), redirect_url.clone()))
+                                     -> Option<AuthzRequestData> {
+        self.client_authorizations.get(&code).cloned()
     }
 
     fn issue_token_to_client(&mut self, _context: &mut (), _code: String, _client_id: String)
