@@ -11,6 +11,11 @@ type of OAuth 2.0 infrastructure, but is not complete, and may not be
 absolutely correct.  Please file bug reports or pull requests if you notice
 any deviation from RFC 6749, or if you have any other issues.
 
+## Stability Note
+
+This library is still undergoing heavy upheaval.  I don't
+recommend using it yet unless you are a masochist.  -Mike, 25 May 2016
+
 ## License
 
 Licensed under either of

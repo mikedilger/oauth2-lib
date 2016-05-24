@@ -7,6 +7,11 @@ type of OAuth 2.0 infrastructure, but is not complete, and may not be
 absolutely correct.  Please file bug reports or pull requests if you notice
 any deviation from RFC 6749, or if you have any other issues.
 
+<h2>Stability Note</h2>
+
+This library is still undergoing heavy upheaval.  I don't
+recommend using it yet unless you are a masochist.  -Mike, 25 May 2016
+
 <h2>Applicability</h2>
 
 OAuth 2.0 is a protocol framework that allows an application (the <em>Client</em>, usually a web
