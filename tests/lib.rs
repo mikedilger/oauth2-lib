@@ -66,26 +66,26 @@ impl MyAuthzServer {
     }
 }
 impl AuthzServer<(),MyError> for MyAuthzServer {
-    fn fetch_client_data(&self, _context: &mut (), client_id: String)
+    fn fetch_client_data(&self, _context: &mut (), client_id: &str)
                          -> Result<Option<ClientData>, OAuthError<MyError>>
     {
         if self.failure == Some(InjectedFailure::NoSuchClient) {
             return Ok(None);
         }
-        Ok(self.registered_clients.get(&client_id).cloned())
+        Ok(self.registered_clients.get(client_id).cloned())
     }
 
-    fn retrieve_client_authorization(&self, _context: &mut (), code: String)
+    fn retrieve_client_authorization(&self, _context: &mut (), code: &str)
                                      -> Result<(String,String), OAuthError<MyError>>
     {
-        match self.client_authorizations.get(&code) {
+        match self.client_authorizations.get(code) {
             None => Err(OAuthError::AuthzUnknownClient),
             Some(&(ref client_id, ref redirect_uri)) =>
                 Ok((client_id.clone(), redirect_uri.clone()))
         }
     }
 
-    fn issue_token_to_client(&mut self, _context: &mut (), _code: String, _client_id: String)
+    fn issue_token_to_client(&mut self, _context: &mut (), _code: &str, _client_id: &str)
                              -> Result<TokenData, OAuthError<MyError>>
     {
         let token = TextNonce::new().into_string();
@@ -214,12 +214,12 @@ impl Client<MyError> for MyClient {
         &self.client_data
     }
 
-    fn store_nonce(&mut self, token: String) {
-        self.nonces.insert(token);
+    fn store_nonce(&mut self, token: &str) {
+        self.nonces.insert(token.to_owned());
     }
 
-    fn consume_nonce(&mut self, token: String) -> bool {
-        self.nonces.remove(&token)
+    fn consume_nonce(&mut self, token: &str) -> bool {
+        self.nonces.remove(token)
     }
 
     fn get_redirect_uri<'a>(&'a self) -> &'a str {

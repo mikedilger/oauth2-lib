@@ -50,17 +50,17 @@ pub trait AuthzServer<C, E: UserError>
     ///
     /// `context` comes from whatever you pass into `handle_authz_request()`,
     /// `finish_authz_request()` or `handle_token_request()`
-    fn fetch_client_data(&self, context: &mut C, client_id: String)
+    fn fetch_client_data(&self, context: &mut C, client_id: &str)
                          -> Result<Option<ClientData>, OAuthError<E>>;
 
     /// Retrieve the data associated with an issued authentication code.
     /// The returned values should be the client_id and the (the first field is
     /// the client id, the second is the redirect_uri for verification).
-    fn retrieve_client_authorization(&self, context: &mut C, code: String)
+    fn retrieve_client_authorization(&self, context: &mut C, code: &str)
                                      -> Result<(String,String), OAuthError<E>>;
 
     /// Issue token to client, recording the issuance internally.
-    fn issue_token_to_client(&mut self, context: &mut C, code: String, client_id: String)
+    fn issue_token_to_client(&mut self, context: &mut C, code: &str, client_id: &str)
                              -> Result<TokenData, OAuthError<E>>;
 
     /// Handle an HTTP request at the authorization endpoint
@@ -133,7 +133,7 @@ pub trait AuthzServer<C, E: UserError>
 
         // Verify the `client_id` matches a known client
         // (and fetch client_data for further use later on)
-        if let None = try!(self.fetch_client_data(context, client_id.clone()))
+        if let None = try!(self.fetch_client_data(context, &*client_id))
         {
             // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
             // missing, invalid, or mismatching redirection URI, or if the client
@@ -180,7 +180,7 @@ pub trait AuthzServer<C, E: UserError>
     {
         // Look up the client data
         let client_data = match try!(self.fetch_client_data(
-            context, client_id.clone()))
+            context, &*client_id))
         {
             Some(cd) => cd,
             None => return Err(OAuthError::AuthzUnknownClient),
@@ -284,7 +284,7 @@ pub trait AuthzServer<C, E: UserError>
                                                Some("Authorization header failed UTF-8 check")),
             };
 
-        let client_data = match self.fetch_client_data(context, auth_client_id.clone()) {
+        let client_data = match self.fetch_client_data(context, &*auth_client_id) {
             Err(_) => token_response_fail!(response, None, TokenErrorCode::InvalidClient,
                                            Some("No such client")),
             Ok(v) => match v {
@@ -355,7 +355,7 @@ pub trait AuthzServer<C, E: UserError>
         let (stored_client_id, stored_redirect_uri): (String,String) = match code {
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
-            Some(ref c) => match self.retrieve_client_authorization(context, c.clone())
+            Some(ref c) => match self.retrieve_client_authorization(context, c)
             {
                 Ok(pair) => pair,
                 _ => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
@@ -384,8 +384,8 @@ pub trait AuthzServer<C, E: UserError>
         }
 
         // Issue token
-        let token = match self.issue_token_to_client(context, code.unwrap(),
-                                                     client_data.client_id) {
+        let token = match self.issue_token_to_client(context, code.as_ref().unwrap(),
+                                                     &*client_data.client_id) {
             Ok(t) => t,
             Err(_) => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                            None),

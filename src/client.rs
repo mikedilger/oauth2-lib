@@ -15,15 +15,15 @@ pub trait Client<E: UserError>
     fn get_client_data<'a>(&'a self) -> &'a ClientData;
 
     /// Store a nonce, used to prevent cross-site reqeuest forgery.
-    fn store_nonce(&mut self, token: String);
+    fn store_nonce(&mut self, token: &str);
 
     /// Consume the nonce from storage, and return true if it was found, false if
     /// no such nonce existed.
-    fn consume_nonce(&mut self, token: String) -> bool;
+    fn consume_nonce(&mut self, token: &str) -> bool;
 
     fn generate_nonce(&mut self) -> String {
         let token = TextNonce::new().into_string();
-        self.store_nonce(token.clone());
+        self.store_nonce(&*token);
         token
     }
 
@@ -94,7 +94,7 @@ pub trait Client<E: UserError>
         match state {
             None => return Err(OAuthError::ClientStateMissing),
             Some(s) => {
-                if ! self.consume_nonce(s) {
+                if ! self.consume_nonce(&*s) {
                     return Err(OAuthError::ClientNonceMismatch);
                 }
             }
