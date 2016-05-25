@@ -53,18 +53,11 @@ pub trait AuthzServer<C, E: UserError>
     fn fetch_client_data(&self, context: &mut C, client_id: String)
                          -> Result<Option<ClientData>, OAuthError<E>>;
 
-    /// If an authorization grant has succeeded, this will be called to store
-
-    /// Store an issued authentication code, along with the request data associated with
-    /// it (in particular, the client_id it was issued to and the redirect_uri that it was
-    /// issued under, and any scope if that applies).
-    fn store_client_authorization(&mut self, context: &mut C, request: AuthzRequest)
-                                  -> Result<(), OAuthError<E>>;
-
-    /// Retrieve the data associated with an issued authentication code (the first field is
-    /// the client id).
+    /// Retrieve the data associated with an issued authentication code.
+    /// The returned values should be the client_id and the (the first field is
+    /// the client id, the second is the redirect_uri for verification).
     fn retrieve_client_authorization(&self, context: &mut C, code: String)
-                                     -> Result<Option<AuthzRequest>, OAuthError<E>>;
+                                     -> Result<(String,String), OAuthError<E>>;
 
     /// Issue token to client, recording the issuance internally.
     fn issue_token_to_client(&mut self, context: &mut C, code: String, client_id: String)
@@ -86,7 +79,7 @@ pub trait AuthzServer<C, E: UserError>
     /// Refer to rfc6749 section 3.1 as to the requirements of the URL endpoint that
     /// performs this task (TLS, no fragment, support of GET with POST optional)
     fn handle_authz_request(&self, context: &mut C, request: Request)
-                            -> Result<AuthzRequest, OAuthError<E>>
+                            -> Result<(AuthzRequest, Option<AuthzError>), OAuthError<E>>
     {
         // Get request URI, so we can get parameters out of it's query string
         let uri_string: &String = match request.uri {
@@ -105,8 +98,6 @@ pub trait AuthzServer<C, E: UserError>
         let mut redirect_uri: Option<String> = None; // optional
         let mut scope: Option<String> = None; // optional
         let mut state: Option<String> = None; // recommended, used for CSRF prevention
-        let mut error: Option<AuthzError> = None; // Error to pass through, if any
-
         let url = try!( Url::parse( &*format!("http://DUMMY{}",uri_string)) );
         for (key,val) in url.query_pairs() {
             match &*key {
@@ -142,18 +133,17 @@ pub trait AuthzServer<C, E: UserError>
 
         // Verify the `client_id` matches a known client
         // (and fetch client_data for further use later on)
-        let client_data = match try!(self.fetch_client_data(context, client_id.clone()))
+        if let None = try!(self.fetch_client_data(context, client_id.clone()))
         {
-            Some(cd) => cd,
-            None => {
-                // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
-                // missing, invalid, or mismatching redirection URI, or if the client
-                // identifier is missing or invalid, the authorization server SHOULD
-                // inform the resource owner of the error and MUST NOT automatically
-                // redirect the user-agent to the invalid redirection URI.
-                return Err(OAuthError::AuthzUnknownClient);
-            },
+            // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
+            // missing, invalid, or mismatching redirection URI, or if the client
+            // identifier is missing or invalid, the authorization server SHOULD
+            // inform the resource owner of the error and MUST NOT automatically
+            // redirect the user-agent to the invalid redirection URI.
+            return Err(OAuthError::AuthzUnknownClient);
         };
+
+        let mut error: Option<AuthzError> = None; // Error to pass through, if any
 
         // Require `response_type` and check it
         match response_type {
@@ -173,107 +163,90 @@ pub trait AuthzServer<C, E: UserError>
             }
         }
 
-        // Handle `redirect_uri` if supplied
-        let redirect_uri = match redirect_uri {
-            None => None,
-            Some(ruri) => {
-                // Verify redirect_uri specified matches one of the registered
-                // redirect URIs.
-                let mut found: bool = false;
-                for uri in &client_data.redirect_uri {
-                    if uri == &*ruri {
-                        found = true;
-                        break;
-                    }
-                }
-                if found==false {
-                    // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
-                    // missing, invalid, or mismatching redirection URI, or if the client
-                    // identifier is missing or invalid, the authorization server SHOULD
-                    // inform the resource owner of the error and MUST NOT automatically
-                    // redirect the user-agent to the invalid redirection URI.
-                    return Err(OAuthError::AuthzRedirectUrlNotRegistered);
-                }
-                Some(ruri)
-            }
-        };
-
-        Ok(AuthzRequest {
-            id: None,
+        Ok((AuthzRequest {
             client_id: client_id,
             redirect_uri: redirect_uri,
             scope: scope,
             state: state,
-            authorization_code: None,
-            error: error,
-        })
+        }, error))
     }
 
-    /// This finishes an Authorization Request sequence.  It should be called
-    /// after the user-agent end user has been authenticated and has approved
-    /// or denied the request.  `data` should have `authorization_code` and
-    /// `error` set appropriately.
-    fn finish_authz_request(&mut self, context: &mut C, mut request: AuthzRequest,
-                            mut response: Response)
-                            -> Result<(), OAuthError<E>>
+    /// This resolves the redirect_uri by using the one from the request (you should
+    /// pass that in from AuthzRequest.redirect_uri) if it is valid, or else using
+    /// the first one registered with the client if the request did not specify one.
+    fn resolve_redirect_uri(&mut self, context: &mut C, client_id: String,
+                            request_redirect_uri: Option<String>)
+                            -> Result<String, OAuthError<E>>
     {
-        // Start the redirect URL
-        let mut url = match request.redirect_uri {
-            Some(ref url) => try!(Url::parse(&**url)),
-            None => {
-                // Look up the client data
-                let client_data = match try!(self.fetch_client_data(
-                    context, request.client_id.clone()))
-                {
-                    Some(cd) => cd,
-                    None => return Err(OAuthError::AuthzUnknownClient),
-                };
-                // Use the first registered redirect_uri
-                try!(Url::parse(&client_data.redirect_uri[0]))
-            }
+        // Look up the client data
+        let client_data = match try!(self.fetch_client_data(
+            context, client_id.clone()))
+        {
+            Some(cd) => cd,
+            None => return Err(OAuthError::AuthzUnknownClient),
         };
 
-        // Make sure authorization_code and error are in sync
-        if request.authorization_code.is_none() && request.error.is_none() {
-            // Not authorized, but no error set.  Set the error
-            request.error = Some(AuthzError {
-                error: AuthzErrorCode::UnauthorizedClient,
-                error_description: None,
-                error_uri: None,
-                state: match request.state {
-                    None => None,
-                    Some(ref state) => Some(state.clone()),
-                },
-            });
-        }
-        if request.authorization_code.is_some() && request.error.is_some() {
-            // code AND error were specified.  To be safe, drop the code.
-            request.authorization_code = None;
-        }
+        // Get the redirect_uri string
+        let s: &str = match request_redirect_uri {
+            Some(ref uri) => uri,
+            None => return Ok(client_data.redirect_uri[0].to_owned())
+        };
 
-        if request.error.is_none() {
-            // Remember that we issued this code, so the token endpoint can get and check
-            // associated data
-            // FIXME: add a timestamp.  We are to expire these after 10 minutes.
-            try!(self.store_client_authorization(
-                context,
-                request.clone()));
-
-            // Put the code into the redirect url
-            let auth_code = request.authorization_code.unwrap();
-            url.query_pairs_mut()
-                .append_pair("code", &*auth_code);
-
-            if let Some(ref s) = request.state {
-                url.query_pairs_mut()
-                    .append_pair("state", s);
+        // Verify s is a valid redirect uri
+        for validuri in &client_data.redirect_uri {
+            if s == validuri {
+                return Ok(s.to_owned())
             }
         }
-        else { //
-            // Put error details into redirect url
-            request.error.as_ref().unwrap().put_into_query_string(&mut url);
+        // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
+        // missing, invalid, or mismatching redirection URI, or if the client
+        // identifier is missing or invalid, the authorization server SHOULD
+        // inform the resource owner of the error and MUST NOT automatically
+        // redirect the user-agent to the invalid redirection URI.
+        Err(OAuthError::AuthzRedirectUrlNotRegistered)
+    }
+
+    /// This finishes an Authorization Request sequence if you have granted the
+    /// request.  It should be called after the user-agent end user has been
+    /// authenticated and has approved or denied the request.
+    fn grant_authz_request(&mut self, mut response: Response,
+                           redirect_uri: String, authorization_code: String,
+                           state: Option<String>) -> Result<(), OAuthError<E>>
+    {
+        // Start the redirect URL
+        let mut url = try!(Url::parse(&*redirect_uri));
+
+        // Put the code into the redirect url
+        url.query_pairs_mut()
+            .append_pair("code", &*authorization_code);
+
+        // Put the state into the redirect url, if some
+        if let Some(ref s) = state {
+            url.query_pairs_mut()
+                .append_pair("state", s);
         }
 
+        // Do the redirect
+        response.headers_mut().set(Location(url.into_string()));
+        *response.status_mut() = StatusCode::Found;
+        let streaming_response = response.start().unwrap();
+        let _ = streaming_response.end();
+        Ok(())
+    }
+
+    /// This finishes an Authorization Request sequence if you have denied the
+    /// request.
+    fn deny_authz_request(&mut self, mut response: Response,
+                          redirect_uri: String, error: AuthzError)
+                          -> Result<(), OAuthError<E>>
+    {
+        // Start the redirect URL
+        let mut url = try!(Url::parse(&*redirect_uri));
+
+        // Put error details into the redirect url
+        error.put_into_query_string(&mut url);
+
+        // Do the redirect
         response.headers_mut().set(Location(url.into_string()));
         *response.status_mut() = StatusCode::Found;
         let streaming_response = response.start().unwrap();
@@ -379,30 +352,31 @@ pub trait AuthzServer<C, E: UserError>
         // Require code, and retrieve the data we issued with the code
         // This also verifies that the code is valid, and was issued to the
         // client in question.
-        let authz_request = match code {
+        let (stored_client_id, stored_redirect_uri): (String,String) = match code {
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
-            Some(ref c) => match self.retrieve_client_authorization(context, c.clone()) {
-                Ok(Some(stuff)) => stuff,
+            Some(ref c) => match self.retrieve_client_authorization(context, c.clone())
+            {
+                Ok(pair) => pair,
                 _ => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                           Some("Invalid authorization code")),
             }
         };
 
         // Verify the client_id matches
-        if authz_request.client_id != client_data.client_id {
+        if stored_client_id != client_data.client_id {
             // FIXME: also delete the stored code and related tokens.
             token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                  Some("client_id mismatch"));
         }
 
         // Verify the redirect_uri matches, if it was used originally
-        if authz_request.redirect_uri.is_some() {
+        if redirect_uri.is_some() {
             match redirect_uri {
                 None => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                              Some("redirect_uri parameter must be \
                                                    supplied in body")),
-                Some(ru) => if &ru != authz_request.redirect_uri.as_ref().unwrap() {
+                Some(ru) => if &ru != &*stored_redirect_uri {
                     token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                          Some("redirect_uri parameter mismatch"));
                 }

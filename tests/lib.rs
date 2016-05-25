@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error as StdError;
 use std::fmt;
 use oauth2::{ClientData, AuthzServer, TokenData, Client, ClientType,
-             AuthzError, AuthzErrorCode, AuthzRequest, UserError, OAuthError};
+             AuthzError, AuthzErrorCode, UserError, OAuthError};
 use hyper::server::{Handler, Request, Response};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri;
@@ -42,7 +42,7 @@ impl UserError for MyError { }
 
 struct MyAuthzServer {
     pub registered_clients: HashMap<String, ClientData>,
-    pub client_authorizations: HashMap<String, AuthzRequest>,
+    pub client_authorizations: HashMap<String, (String, String)>, // code => client_id, redirect_uri
     pub failure: Option<InjectedFailure>
 }
 impl MyAuthzServer {
@@ -75,18 +75,14 @@ impl AuthzServer<(),MyError> for MyAuthzServer {
         Ok(self.registered_clients.get(&client_id).cloned())
     }
 
-    fn store_client_authorization(&mut self, _context: &mut (), request: AuthzRequest)
-        -> Result<(), OAuthError<MyError>>
-    {
-        let code = request.authorization_code.as_ref().unwrap().clone();
-        self.client_authorizations.insert(code, request);
-        Ok(())
-    }
-
     fn retrieve_client_authorization(&self, _context: &mut (), code: String)
-                                     -> Result<Option<AuthzRequest>, OAuthError<MyError>>
+                                     -> Result<(String,String), OAuthError<MyError>>
     {
-        Ok(self.client_authorizations.get(&code).cloned())
+        match self.client_authorizations.get(&code) {
+            None => Err(OAuthError::AuthzUnknownClient),
+            Some(&(ref client_id, ref redirect_uri)) =>
+                Ok((client_id.clone(), redirect_uri.clone()))
+        }
     }
 
     fn issue_token_to_client(&mut self, _context: &mut (), _code: String, _client_id: String)
@@ -131,27 +127,53 @@ impl Handler for MyAuthzHandler {
             "/authorization" => {
                 let mut authz_server = self.authz_server.lock().unwrap();
                 match authz_server.handle_authz_request(&mut (), request) {
-                    Ok(mut request_data) => {
-                        if request_data.error.is_none() {
-                            // NOTE: If you are following this test as example code, this is
-                            // where the AuthzServer must authenticate the user-agent and also
-                            // ask the user if they wish to authorize the request.
-                            // For this test, we presume they are authentic, and that they do.
+                    Ok((request_data, option_error)) => {
 
-                            if authz_server.failure == Some(InjectedFailure::NotAuthorized) {
-                                request_data.authorization_code = None;
-                                request_data.error = Some(AuthzError {
-                                    error: AuthzErrorCode::AccessDenied,
-                                    error_description: None,
-                                    error_uri: None,
-                                    state: None,
-                                });
-                            } else {
-                                // Set authorization code (will be used by client)
-                                request_data.authorization_code = Some("authorized".to_owned());
-                            }
+                        // Resolve the redirect_uri
+                        let redirect_uri = match authz_server.resolve_redirect_uri(
+                            &mut (),
+                            request_data.client_id.clone(),
+                            request_data.redirect_uri.clone())
+                        {
+                            Ok(r) => r,
+                            Err(_) => return self.handle_fail(response, None),
+                        };
+
+                        // Deal with any error from upstream
+                        if option_error.is_some() {
+                            let _ = authz_server.deny_authz_request(
+                                response, redirect_uri.clone(), option_error.unwrap());
+                            return;
                         }
-                        let _ = authz_server.finish_authz_request(&mut (), request_data, response);
+
+                        // NOTE: If you are following this test as example code, this is
+                        // where the AuthzServer must authenticate the user-agent and also
+                        // ask the user if they wish to authorize the request.
+                        // For this test, we presume they are authentic, and that they do.
+
+                        if authz_server.failure == Some(InjectedFailure::NotAuthorized) {
+                            let error = AuthzError {
+                                error: AuthzErrorCode::AccessDenied,
+                                error_description: None,
+                                error_uri: None,
+                                state: None,
+                            };
+                            let _ = authz_server.deny_authz_request(
+                                response, redirect_uri, error);
+                            return;
+                        }
+                        else {
+                            let authorization_code = "authorized".to_owned();
+
+                            // Save the authorization grant
+                            authz_server.client_authorizations.insert(
+                                authorization_code.clone(),
+                                (request_data.client_id, redirect_uri.clone()));
+
+                            let _ = authz_server.grant_authz_request(
+                                response, redirect_uri,
+                                authorization_code, request_data.state);
+                        }
                     },
                     Err(_) => self.handle_fail(response, None),
                 }
