@@ -2,7 +2,7 @@
 use std::str::Utf8Error;
 use url::percent_encoding::{QUERY_ENCODE_SET, percent_encode, percent_decode};
 use hyper::header::{Authorization, Basic};
-use ClientType;
+use {ClientType, ClientId};
 
 /// Client data is registered with the Authorization Service prior to the OAuth 2.0
 /// protocol commencing.  This can be done with config files for well-known clients.
@@ -13,7 +13,7 @@ pub struct ClientData {
     /// Client Identifier.  Required.  Must be unique across the Authorization Service and
     /// so is typically issued by the Authorization Service.  Also used to fetch this
     /// entire record.
-    pub client_id: String,
+    pub client_id: ClientId,
 
     /// Client Type.  Required, even if your implementation only ever uses one type.
     pub client_type: ClientType,
@@ -48,15 +48,15 @@ impl ClientData {
     }
 
     pub fn http_basic_authentication_deconstruct(basic: Basic)
-                                                 -> Result<(String, String), Utf8Error>
+                                                 -> Result<(ClientId, String), Utf8Error>
     {
-        let client_id =
+        let client_id_string =
             try!(percent_decode(basic.username.as_bytes()).decode_utf8()).into_owned();
         let authz_credentials = if basic.password.is_none() {
             String::new()
         } else {
             try!(percent_decode(basic.password.unwrap().as_bytes()).decode_utf8()).into_owned()
         };
-        Ok((client_id, authz_credentials))
+        Ok((ClientId(client_id_string), authz_credentials))
     }
 }

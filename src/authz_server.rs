@@ -7,7 +7,7 @@ use hyper::header::{Authorization, Basic, Location, ContentType, CacheDirective,
 use hyper::status::StatusCode;
 use url::Url;
 use {ClientData, OAuthError, UserError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
-     AuthzRequest, TokenData};
+     AuthzRequest, TokenData, ClientId};
 
 
 header! { (WwwAuthenticate, "WWW-Authenticate") => [String] }
@@ -50,17 +50,17 @@ pub trait AuthzServer<C, E: UserError>
     ///
     /// `context` comes from whatever you pass into `handle_authz_request()`,
     /// `finish_authz_request()` or `handle_token_request()`
-    fn fetch_client_data(&self, context: &mut C, client_id: &str)
+    fn fetch_client_data(&self, context: &mut C, client_id: &ClientId)
                          -> Result<Option<ClientData>, OAuthError<E>>;
 
     /// Retrieve the data associated with an issued authentication code.
     /// The returned values should be the client_id and the (the first field is
     /// the client id, the second is the redirect_uri for verification).
     fn retrieve_client_authorization(&self, context: &mut C, code: &str)
-                                     -> Result<(String,String), OAuthError<E>>;
+                                     -> Result<(ClientId,String), OAuthError<E>>;
 
     /// Issue token to client, recording the issuance internally.
-    fn issue_token_to_client(&mut self, context: &mut C, code: &str, client_id: &str)
+    fn issue_token_to_client(&mut self, context: &mut C, code: &str, client_id: &ClientId)
                              -> Result<TokenData, OAuthError<E>>;
 
     /// Handle an HTTP request at the authorization endpoint
@@ -94,14 +94,14 @@ pub trait AuthzServer<C, E: UserError>
 
         // Get expected (and optional) request parameters
         let mut response_type: Option<String> = None; // required
-        let mut client_id: Option<String> = None; // required
+        let mut client_id: Option<ClientId> = None; // required
         let mut redirect_uri: Option<String> = None; // optional
         let mut scope: Option<String> = None; // optional
         let mut state: Option<String> = None; // recommended, used for CSRF prevention
         let url = try!( Url::parse( &*format!("http://DUMMY{}",uri_string)) );
         for (key,val) in url.query_pairs() {
             match &*key {
-                "client_id" => client_id = Some(val.into_owned()),
+                "client_id" => client_id = Some(ClientId(val.into_owned())),
                 "response_type" => response_type = Some(val.into_owned()),
                 "redirect_uri" => redirect_uri = Some(val.into_owned()),
                 "scope" => scope = Some(val.into_owned()),
@@ -133,7 +133,7 @@ pub trait AuthzServer<C, E: UserError>
 
         // Verify the `client_id` matches a known client
         // (and fetch client_data for further use later on)
-        if let None = try!(self.fetch_client_data(context, &*client_id))
+        if let None = try!(self.fetch_client_data(context, &client_id))
         {
             // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
             // missing, invalid, or mismatching redirection URI, or if the client
@@ -174,13 +174,13 @@ pub trait AuthzServer<C, E: UserError>
     /// This resolves the redirect_uri by using the one from the request (you should
     /// pass that in from AuthzRequest.redirect_uri) if it is valid, or else using
     /// the first one registered with the client if the request did not specify one.
-    fn resolve_redirect_uri(&mut self, context: &mut C, client_id: String,
+    fn resolve_redirect_uri(&mut self, context: &mut C, client_id: &ClientId,
                             request_redirect_uri: Option<String>)
                             -> Result<String, OAuthError<E>>
     {
         // Look up the client data
         let client_data = match try!(self.fetch_client_data(
-            context, &*client_id))
+            context, client_id))
         {
             Some(cd) => cd,
             None => return Err(OAuthError::AuthzUnknownClient),
@@ -277,14 +277,14 @@ pub trait AuthzServer<C, E: UserError>
             token_response_fail!(response, None, TokenErrorCode::InvalidClient,
                                  Some("Authorization header missing"));
         };
-        let (auth_client_id, authz_credentials): (String, String) =
+        let (auth_client_id, authz_credentials): (ClientId, String) =
             match ClientData::http_basic_authentication_deconstruct(basic) {
                 Ok(stuff) => stuff,
                 Err(_) => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                                Some("Authorization header failed UTF-8 check")),
             };
 
-        let client_data = match self.fetch_client_data(context, &*auth_client_id) {
+        let client_data = match self.fetch_client_data(context, &auth_client_id) {
             Err(_) => token_response_fail!(response, None, TokenErrorCode::InvalidClient,
                                            Some("No such client")),
             Ok(v) => match v {
@@ -352,7 +352,7 @@ pub trait AuthzServer<C, E: UserError>
         // Require code, and retrieve the data we issued with the code
         // This also verifies that the code is valid, and was issued to the
         // client in question.
-        let (stored_client_id, stored_redirect_uri): (String,String) = match code {
+        let (stored_client_id, stored_redirect_uri): (ClientId,String) = match code {
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
             Some(ref c) => match self.retrieve_client_authorization(context, c)
@@ -385,7 +385,7 @@ pub trait AuthzServer<C, E: UserError>
 
         // Issue token
         let token = match self.issue_token_to_client(context, code.as_ref().unwrap(),
-                                                     &*client_data.client_id) {
+                                                     &client_data.client_id) {
             Ok(t) => t,
             Err(_) => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                            None),

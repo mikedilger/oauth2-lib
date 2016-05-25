@@ -115,7 +115,7 @@ pub trait Client<E: UserError>
         let hyper = ::hyper::client::Client::new();
         let mut res = hyper.post(authz_token_url)
             .header(Authorization(Basic {
-                username: client_data.client_id.clone(),
+                username: (*client_data.client_id).clone(),
                 password: Some(client_data.credentials.clone())
             }))
             .body(&*body)

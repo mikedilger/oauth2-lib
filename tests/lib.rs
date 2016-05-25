@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error as StdError;
 use std::fmt;
 use oauth2::{ClientData, AuthzServer, TokenData, Client, ClientType,
-             AuthzError, AuthzErrorCode, UserError, OAuthError};
+             AuthzError, AuthzErrorCode, UserError, OAuthError, ClientId};
 use hyper::server::{Handler, Request, Response};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri;
@@ -41,16 +41,16 @@ impl fmt::Display for MyError {
 impl UserError for MyError { }
 
 struct MyAuthzServer {
-    pub registered_clients: HashMap<String, ClientData>,
-    pub client_authorizations: HashMap<String, (String, String)>, // code => client_id, redirect_uri
+    pub registered_clients: HashMap<ClientId, ClientData>,
+    pub client_authorizations: HashMap<String, (ClientId, String)>, // code => client_id, redirect_uri
     pub failure: Option<InjectedFailure>
 }
 impl MyAuthzServer {
     pub fn new(client_port: u16, failure: Option<InjectedFailure>) -> MyAuthzServer {
-        let mut rc: HashMap<String, ClientData> = HashMap::new();
-        rc.insert("1".to_string(),
+        let mut rc: HashMap<ClientId, ClientData> = HashMap::new();
+        rc.insert(ClientId("1".to_string()),
                   ClientData {
-                      client_id: "1".to_string(),
+                      client_id: ClientId("1".to_string()),
                       client_type: ClientType::ConfidentialClient,
                       redirect_uri: vec![
                           format!("http://127.0.0.1:{}/redirect_uri", client_port) ],
@@ -66,7 +66,7 @@ impl MyAuthzServer {
     }
 }
 impl AuthzServer<(),MyError> for MyAuthzServer {
-    fn fetch_client_data(&self, _context: &mut (), client_id: &str)
+    fn fetch_client_data(&self, _context: &mut (), client_id: &ClientId)
                          -> Result<Option<ClientData>, OAuthError<MyError>>
     {
         if self.failure == Some(InjectedFailure::NoSuchClient) {
@@ -76,7 +76,7 @@ impl AuthzServer<(),MyError> for MyAuthzServer {
     }
 
     fn retrieve_client_authorization(&self, _context: &mut (), code: &str)
-                                     -> Result<(String,String), OAuthError<MyError>>
+                                     -> Result<(ClientId,String), OAuthError<MyError>>
     {
         match self.client_authorizations.get(code) {
             None => Err(OAuthError::AuthzUnknownClient),
@@ -85,7 +85,7 @@ impl AuthzServer<(),MyError> for MyAuthzServer {
         }
     }
 
-    fn issue_token_to_client(&mut self, _context: &mut (), _code: &str, _client_id: &str)
+    fn issue_token_to_client(&mut self, _context: &mut (), _code: &str, _client_id: &ClientId)
                              -> Result<TokenData, OAuthError<MyError>>
     {
         let token = TextNonce::new().into_string();
@@ -132,8 +132,8 @@ impl Handler for MyAuthzHandler {
                         // Resolve the redirect_uri
                         let redirect_uri = match authz_server.resolve_redirect_uri(
                             &mut (),
-                            request_data.client_id.clone(),
-                            request_data.redirect_uri.clone())
+                            &request_data.client_id,
+                            request_data.redirect_uri.as_ref())
                         {
                             Ok(r) => r,
                             Err(_) => return self.handle_fail(response, None),
@@ -196,7 +196,7 @@ impl MyClient {
     pub fn new(client_port: u16, server_port: u16) -> MyClient {
         MyClient {
             client_data: ClientData {
-                client_id: "1".to_string(),
+                client_id: ClientId("1".to_string()),
                 client_type: ClientType::ConfidentialClient,
                 redirect_uri: vec![
                     format!("http://127.0.0.1:{}/redirect_uri", client_port) ],
