@@ -2,7 +2,7 @@
 use std::str::Utf8Error;
 use url::percent_encoding::{QUERY_ENCODE_SET, percent_encode, percent_decode};
 use hyper::header::{Authorization, Basic};
-use {ClientType, ClientId};
+use {ClientType, ClientId, RedirectUri};
 
 /// Client data is registered with the Authorization Service prior to the OAuth 2.0
 /// protocol commencing.  This can be done with config files for well-known clients.
@@ -21,7 +21,7 @@ pub struct ClientData {
     /// Redirect URL(s) as Strings.  Required for public clients, required if the client has
     /// multiple, otherwise optional but SHOULD be supplied anyway.  The first one is used
     /// if not supplied in the protocol.
-    pub redirect_uri: Vec<String>,
+    pub redirect_uri: Vec<RedirectUri>,
 
     /// Client Credentials, serialized.  Required, but the details are out of scope.
     pub credentials: String,

@@ -9,7 +9,8 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error as StdError;
 use std::fmt;
 use oauth2::{ClientData, AuthzServer, TokenData, Client, ClientType,
-             AuthzError, AuthzErrorCode, UserError, OAuthError, ClientId};
+             AuthzError, AuthzErrorCode, UserError, OAuthError, ClientId,
+             RedirectUri};
 use hyper::server::{Handler, Request, Response};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri;
@@ -42,7 +43,7 @@ impl UserError for MyError { }
 
 struct MyAuthzServer {
     pub registered_clients: HashMap<ClientId, ClientData>,
-    pub client_authorizations: HashMap<String, (ClientId, String)>, // code => client_id, redirect_uri
+    pub client_authorizations: HashMap<String, (ClientId, RedirectUri)>, // code => client_id, redirect_uri
     pub failure: Option<InjectedFailure>
 }
 impl MyAuthzServer {
@@ -53,7 +54,7 @@ impl MyAuthzServer {
                       client_id: ClientId("1".to_string()),
                       client_type: ClientType::ConfidentialClient,
                       redirect_uri: vec![
-                          format!("http://127.0.0.1:{}/redirect_uri", client_port) ],
+                          RedirectUri(format!("http://127.0.0.1:{}/redirect_uri", client_port)) ],
                       credentials: "boo".to_owned(),
                       authn_scheme: None
                   });
@@ -76,7 +77,7 @@ impl AuthzServer<(),MyError> for MyAuthzServer {
     }
 
     fn retrieve_client_authorization(&self, _context: &mut (), code: &str)
-                                     -> Result<(ClientId,String), OAuthError<MyError>>
+                                     -> Result<(ClientId, RedirectUri), OAuthError<MyError>>
     {
         match self.client_authorizations.get(code) {
             None => Err(OAuthError::AuthzUnknownClient),
@@ -142,7 +143,7 @@ impl Handler for MyAuthzHandler {
                         // Deal with any error from upstream
                         if option_error.is_some() {
                             let _ = authz_server.deny_authz_request(
-                                response, redirect_uri.clone(), option_error.unwrap());
+                                response, &redirect_uri, option_error.unwrap());
                             return;
                         }
 
@@ -159,7 +160,7 @@ impl Handler for MyAuthzHandler {
                                 state: None,
                             };
                             let _ = authz_server.deny_authz_request(
-                                response, redirect_uri, error);
+                                response, &redirect_uri, error);
                             return;
                         }
                         else {
@@ -171,7 +172,7 @@ impl Handler for MyAuthzHandler {
                                 (request_data.client_id, redirect_uri.clone()));
 
                             let _ = authz_server.grant_authz_request(
-                                response, redirect_uri,
+                                response, &redirect_uri,
                                 authorization_code, request_data.state);
                         }
                     },
@@ -199,7 +200,7 @@ impl MyClient {
                 client_id: ClientId("1".to_string()),
                 client_type: ClientType::ConfidentialClient,
                 redirect_uri: vec![
-                    format!("http://127.0.0.1:{}/redirect_uri", client_port) ],
+                    RedirectUri(format!("http://127.0.0.1:{}/redirect_uri", client_port)) ],
                 credentials: "boo".to_owned(),
                 authn_scheme: None
             },

@@ -1,5 +1,5 @@
 
-use ClientId;
+use {ClientId, RedirectUri};
 
 /// This is the data that the client sends to the authz_server when requesting an
 /// authorization grant, as defined in RFC 6749 section 4.1.1
@@ -12,7 +12,7 @@ pub struct AuthzRequest {
     pub client_id: ClientId,
 
     /// redirect_uri as supplied in the request, or None if not supplied
-    pub redirect_uri: Option<String>,
+    pub redirect_uri: Option<RedirectUri>,
 
     /// scope as supplied in the request
     pub scope: Option<String>,

@@ -7,7 +7,7 @@ use hyper::header::{Authorization, Basic, Location, ContentType, CacheDirective,
 use hyper::status::StatusCode;
 use url::Url;
 use {ClientData, OAuthError, UserError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
-     AuthzRequest, TokenData, ClientId};
+     AuthzRequest, TokenData, ClientId, RedirectUri};
 
 
 header! { (WwwAuthenticate, "WWW-Authenticate") => [String] }
@@ -54,10 +54,8 @@ pub trait AuthzServer<C, E: UserError>
                          -> Result<Option<ClientData>, OAuthError<E>>;
 
     /// Retrieve the data associated with an issued authentication code.
-    /// The returned values should be the client_id and the (the first field is
-    /// the client id, the second is the redirect_uri for verification).
     fn retrieve_client_authorization(&self, context: &mut C, code: &str)
-                                     -> Result<(ClientId,String), OAuthError<E>>;
+                                     -> Result<(ClientId, RedirectUri), OAuthError<E>>;
 
     /// Issue token to client, recording the issuance internally.
     fn issue_token_to_client(&mut self, context: &mut C, code: &str, client_id: &ClientId)
@@ -95,7 +93,7 @@ pub trait AuthzServer<C, E: UserError>
         // Get expected (and optional) request parameters
         let mut response_type: Option<String> = None; // required
         let mut client_id: Option<ClientId> = None; // required
-        let mut redirect_uri: Option<String> = None; // optional
+        let mut redirect_uri: Option<RedirectUri> = None; // optional
         let mut scope: Option<String> = None; // optional
         let mut state: Option<String> = None; // recommended, used for CSRF prevention
         let url = try!( Url::parse( &*format!("http://DUMMY{}",uri_string)) );
@@ -103,7 +101,7 @@ pub trait AuthzServer<C, E: UserError>
             match &*key {
                 "client_id" => client_id = Some(ClientId(val.into_owned())),
                 "response_type" => response_type = Some(val.into_owned()),
-                "redirect_uri" => redirect_uri = Some(val.into_owned()),
+                "redirect_uri" => redirect_uri = Some(RedirectUri(val.into_owned())),
                 "scope" => scope = Some(val.into_owned()),
                 "state" => state = Some(val.into_owned()),
                 _ => {} // MUST ignore unknown parameters
@@ -175,8 +173,8 @@ pub trait AuthzServer<C, E: UserError>
     /// pass that in from AuthzRequest.redirect_uri) if it is valid, or else using
     /// the first one registered with the client if the request did not specify one.
     fn resolve_redirect_uri(&mut self, context: &mut C, client_id: &ClientId,
-                            request_redirect_uri: Option<String>)
-                            -> Result<String, OAuthError<E>>
+                            request_redirect_uri: Option<&RedirectUri>)
+                            -> Result<RedirectUri, OAuthError<E>>
     {
         // Look up the client data
         let client_data = match try!(self.fetch_client_data(
@@ -186,16 +184,16 @@ pub trait AuthzServer<C, E: UserError>
             None => return Err(OAuthError::AuthzUnknownClient),
         };
 
-        // Get the redirect_uri string
-        let s: &str = match request_redirect_uri {
+        // Get the redirect_uri
+        let cru: &RedirectUri = match request_redirect_uri {
             Some(ref uri) => uri,
-            None => return Ok(client_data.redirect_uri[0].to_owned())
+            None => return Ok(client_data.redirect_uri[0].clone())
         };
 
-        // Verify s is a valid redirect uri
+        // Verify cru is a valid redirect uri
         for validuri in &client_data.redirect_uri {
-            if s == validuri {
-                return Ok(s.to_owned())
+            if cru == validuri {
+                return Ok(cru.clone())
             }
         }
         // rfc6749, section 4.1.2.1 paragraph 1: "If the request fails due to a
@@ -210,11 +208,11 @@ pub trait AuthzServer<C, E: UserError>
     /// request.  It should be called after the user-agent end user has been
     /// authenticated and has approved or denied the request.
     fn grant_authz_request(&mut self, mut response: Response,
-                           redirect_uri: String, authorization_code: String,
+                           redirect_uri: &RedirectUri, authorization_code: String,
                            state: Option<String>) -> Result<(), OAuthError<E>>
     {
         // Start the redirect URL
-        let mut url = try!(Url::parse(&*redirect_uri));
+        let mut url = try!(Url::parse(&***redirect_uri));
 
         // Put the code into the redirect url
         url.query_pairs_mut()
@@ -237,11 +235,11 @@ pub trait AuthzServer<C, E: UserError>
     /// This finishes an Authorization Request sequence if you have denied the
     /// request.
     fn deny_authz_request(&mut self, mut response: Response,
-                          redirect_uri: String, error: AuthzError)
+                          redirect_uri: &RedirectUri, error: AuthzError)
                           -> Result<(), OAuthError<E>>
     {
         // Start the redirect URL
-        let mut url = try!(Url::parse(&*redirect_uri));
+        let mut url = try!(Url::parse(&***redirect_uri));
 
         // Put error details into the redirect url
         error.put_into_query_string(&mut url);
@@ -323,7 +321,7 @@ pub trait AuthzServer<C, E: UserError>
         // Get expected (and optional) request parameters
         let mut grant_type: Option<String> = None;
         let mut code: Option<String> = None;
-        let mut redirect_uri: Option<String> = None;
+        let mut redirect_uri: Option<RedirectUri> = None;
 
         let url = match Url::parse( &*format!("http://DUMMY?{}",body)) {
             Ok(url) => url,
@@ -335,7 +333,7 @@ pub trait AuthzServer<C, E: UserError>
             match &*key {
                 "grant_type" => grant_type = Some(val.into_owned()),
                 "code" => code = Some(val.into_owned()),
-                "redirect_uri" => redirect_uri = Some(val.into_owned()),
+                "redirect_uri" => redirect_uri = Some(RedirectUri(val.into_owned())),
                 _ => {} // MUST ignore unknown parameters
             }
         }
@@ -352,7 +350,7 @@ pub trait AuthzServer<C, E: UserError>
         // Require code, and retrieve the data we issued with the code
         // This also verifies that the code is valid, and was issued to the
         // client in question.
-        let (stored_client_id, stored_redirect_uri): (ClientId,String) = match code {
+        let (stored_client_id, stored_redirect_uri): (ClientId, RedirectUri) = match code {
             None => token_response_fail!(response, None, TokenErrorCode::InvalidRequest,
                                          Some("code parameter must be supplied in body")),
             Some(ref c) => match self.retrieve_client_authorization(context, c)
@@ -376,7 +374,7 @@ pub trait AuthzServer<C, E: UserError>
                 None => token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                              Some("redirect_uri parameter must be \
                                                    supplied in body")),
-                Some(ru) => if &ru != &*stored_redirect_uri {
+                Some(ru) => if &ru != &stored_redirect_uri {
                     token_response_fail!(response, None, TokenErrorCode::InvalidGrant,
                                          Some("redirect_uri parameter mismatch"));
                 }
