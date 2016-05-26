@@ -76,27 +76,16 @@ pub trait AuthzServer<C>
     ///
     /// Refer to rfc6749 section 3.1 as to the requirements of the URL endpoint that
     /// performs this task (TLS, no fragment, support of GET with POST optional)
-    fn handle_authz_request(&self, context: &mut C, request: Request)
+    fn handle_authz_request(&self, context: &mut C, uri_string: &str)
                             -> Result<(AuthzRequest, Option<AuthzError>), OAuthError>
     {
-        // Get request URI, so we can get parameters out of it's query string
-        let uri_string: &String = match request.uri {
-            RequestUri::AbsolutePath(ref s) => s,
-            _ => {
-                // rfc6749, section 4.1.2.1 paragraph 1, instructs us to redirect onwards
-                // with error = 'invalid_request', but since we cannot get parameters out
-                // of such a bad request, we have to fail early.
-                return Err(OAuthError::AuthzBadRequest);
-            },
-        };
-
         // Get expected (and optional) request parameters
         let mut response_type: Option<String> = None; // required
         let mut client_id: Option<ClientId> = None; // required
         let mut redirect_uri: Option<RedirectUri> = None; // optional
         let mut scope: Option<String> = None; // optional
         let mut state: Option<String> = None; // recommended, used for CSRF prevention
-        let url = try!( Url::parse( &*format!("http://DUMMY{}",uri_string)) );
+        let url = try!( Url::parse( uri_string) );
         for (key,val) in url.query_pairs() {
             match &*key {
                 "client_id" => client_id = Some(ClientId(val.into_owned())),
