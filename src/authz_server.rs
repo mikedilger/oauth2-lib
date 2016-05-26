@@ -6,7 +6,7 @@ use hyper::header::{Authorization, Basic, Location, ContentType, CacheDirective,
                     Pragma};
 use hyper::status::StatusCode;
 use url::Url;
-use {ClientData, OAuthError, UserError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
+use {ClientData, OAuthError, AuthzError, AuthzErrorCode, TokenError, TokenErrorCode,
      AuthzRequest, TokenData, ClientId, RedirectUri};
 
 
@@ -39,27 +39,27 @@ macro_rules! token_response_fail {
     };
 }
 
-pub trait AuthzServer<C, E: UserError>
+pub trait AuthzServer<C>
 {
     /// Fetch data about a registered OAuth 2.0 client (clients are the other websites
     /// which are trying to login to your website on behalf of the user, and should have
     /// been registered with your site ahead of time).
     ///
     /// Should return Ok(Some(ClientData)) if found, Ok(None) if not found, and
-    /// Err(OAuthError<E>) on error.
+    /// Err(OAuthError) on error.
     ///
     /// `context` comes from whatever you pass into `handle_authz_request()`,
     /// `finish_authz_request()` or `handle_token_request()`
     fn fetch_client_data(&self, context: &mut C, client_id: &ClientId)
-                         -> Result<Option<ClientData>, OAuthError<E>>;
+                         -> Result<Option<ClientData>, OAuthError>;
 
     /// Retrieve the data associated with an issued authentication code.
     fn retrieve_client_authorization(&self, context: &mut C, code: &str)
-                                     -> Result<(ClientId, RedirectUri), OAuthError<E>>;
+                                     -> Result<(ClientId, RedirectUri), OAuthError>;
 
     /// Issue token to client, recording the issuance internally.
     fn issue_token_to_client(&mut self, context: &mut C, code: &str, client_id: &ClientId)
-                             -> Result<TokenData, OAuthError<E>>;
+                             -> Result<TokenData, OAuthError>;
 
     /// Handle an HTTP request at the authorization endpoint
     /// (From a user-agent, redirected by a client)
@@ -77,7 +77,7 @@ pub trait AuthzServer<C, E: UserError>
     /// Refer to rfc6749 section 3.1 as to the requirements of the URL endpoint that
     /// performs this task (TLS, no fragment, support of GET with POST optional)
     fn handle_authz_request(&self, context: &mut C, request: Request)
-                            -> Result<(AuthzRequest, Option<AuthzError>), OAuthError<E>>
+                            -> Result<(AuthzRequest, Option<AuthzError>), OAuthError>
     {
         // Get request URI, so we can get parameters out of it's query string
         let uri_string: &String = match request.uri {
@@ -174,7 +174,7 @@ pub trait AuthzServer<C, E: UserError>
     /// the first one registered with the client if the request did not specify one.
     fn resolve_redirect_uri(&mut self, context: &mut C, client_id: &ClientId,
                             request_redirect_uri: Option<&RedirectUri>)
-                            -> Result<RedirectUri, OAuthError<E>>
+                            -> Result<RedirectUri, OAuthError>
     {
         // Look up the client data
         let client_data = match try!(self.fetch_client_data(
@@ -209,7 +209,7 @@ pub trait AuthzServer<C, E: UserError>
     /// authenticated and has approved or denied the request.
     fn grant_authz_request(&mut self, mut response: Response,
                            redirect_uri: &RedirectUri, authorization_code: String,
-                           state: Option<String>) -> Result<(), OAuthError<E>>
+                           state: Option<String>) -> Result<(), OAuthError>
     {
         // Start the redirect URL
         let mut url = try!(Url::parse(&***redirect_uri));
@@ -236,7 +236,7 @@ pub trait AuthzServer<C, E: UserError>
     /// request.
     fn deny_authz_request(&mut self, mut response: Response,
                           redirect_uri: &RedirectUri, error: AuthzError)
-                          -> Result<(), OAuthError<E>>
+                          -> Result<(), OAuthError>
     {
         // Start the redirect URL
         let mut url = try!(Url::parse(&***redirect_uri));

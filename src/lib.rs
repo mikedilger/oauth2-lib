@@ -102,4 +102,4 @@ pub use client::Client;
 pub use client_id::ClientId;
 pub use client_type::ClientType;
 pub use client_data::ClientData;
-pub use error::{OAuthError, UserError};
+pub use error::OAuthError;

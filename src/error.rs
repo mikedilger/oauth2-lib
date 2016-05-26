@@ -7,12 +7,9 @@ use std::num::ParseIntError;
 use std::error::Error as StdError;
 use std::fmt;
 
-/// A trait for Errors produced by the consumer of this library
-pub trait UserError: StdError { }
-
 /// These are errors returned to the caller
 #[derive(Debug)]
-pub enum OAuthError<E: UserError> {
+pub enum OAuthError {
     Utf8Error(Utf8Error),
     FromUtf8Error(FromUtf8Error),
     Url(::url::ParseError),
@@ -29,10 +26,9 @@ pub enum OAuthError<E: UserError> {
     ClientStateMissing,
     ClientNonceMismatch,
     UnexpectedStatusCode,
-    UserError(E),
 }
 
-impl<E: UserError> fmt::Display for OAuthError<E> {
+impl fmt::Display for OAuthError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
     {
         match *self {
@@ -41,13 +37,12 @@ impl<E: UserError> fmt::Display for OAuthError<E> {
             OAuthError::Url(ref e) => e.fmt(f),
             OAuthError::Io(ref e) => e.fmt(f),
             OAuthError::ParseInt(ref e) => e.fmt(f),
-            OAuthError::UserError(ref e) => fmt::Display::fmt(e,f),
             ref e => write!(f, "{}", e.description()),
         }
     }
 }
 
-impl<E: UserError> StdError for OAuthError<E> {
+impl StdError for OAuthError {
     fn description(&self) -> &str {
         match *self {
             OAuthError::Utf8Error(ref e) => e.description(),
@@ -66,7 +61,6 @@ impl<E: UserError> StdError for OAuthError<E> {
             OAuthError::ClientStateMissing => "`state` Missing",
             OAuthError::ClientNonceMismatch => "`nonce` Mismatch",
             OAuthError::UnexpectedStatusCode => "Unexpected HTTP Status Code",
-            OAuthError::UserError(ref e) => e.description(),
         }
     }
 
@@ -77,44 +71,37 @@ impl<E: UserError> StdError for OAuthError<E> {
             OAuthError::Url(ref e) => Some(e),
             OAuthError::Io(ref e) => Some(e),
             OAuthError::ParseInt(ref e) => Some(e),
-            OAuthError::UserError(ref e) => Some(e),
             _ => None,
         }
     }
 }
 
-impl<E: UserError> From<Utf8Error> for OAuthError<E> {
-    fn from(e: Utf8Error) -> OAuthError<E> {
+impl From<Utf8Error> for OAuthError {
+    fn from(e: Utf8Error) -> OAuthError {
         OAuthError::Utf8Error(e)
     }
 }
 
-impl<E: UserError> From<FromUtf8Error> for OAuthError<E> {
-    fn from(e: FromUtf8Error) -> OAuthError<E> {
+impl From<FromUtf8Error> for OAuthError {
+    fn from(e: FromUtf8Error) -> OAuthError {
         OAuthError::FromUtf8Error(e)
     }
 }
 
-impl<E: UserError> From<::url::ParseError> for OAuthError<E> {
-    fn from(e: ::url::ParseError) -> OAuthError<E> {
+impl From<::url::ParseError> for OAuthError {
+    fn from(e: ::url::ParseError) -> OAuthError {
         OAuthError::Url(e)
     }
 }
 
-impl<E: UserError> From<IoError> for OAuthError<E> {
-    fn from(e: IoError) -> OAuthError<E> {
+impl From<IoError> for OAuthError {
+    fn from(e: IoError) -> OAuthError {
         OAuthError::Io(e)
     }
 }
 
-impl<E: UserError> From<ParseIntError> for OAuthError<E> {
-    fn from(e: ParseIntError) -> OAuthError<E> {
+impl From<ParseIntError> for OAuthError {
+    fn from(e: ParseIntError) -> OAuthError {
         OAuthError::ParseInt(e)
-    }
-}
-
-impl<E: UserError> From<E> for OAuthError<E> {
-    fn from(e: E) -> OAuthError<E> {
-        OAuthError::UserError(e)
     }
 }
