@@ -3,6 +3,7 @@ use std::str::Utf8Error;
 use std::string::FromUtf8Error;
 use std::convert::From;
 use std::io::Error as IoError;
+use std::num::ParseIntError;
 use std::error::Error as StdError;
 use std::fmt;
 
@@ -16,12 +17,14 @@ pub enum OAuthError<E: UserError> {
     FromUtf8Error(FromUtf8Error),
     Url(::url::ParseError),
     Io(IoError),
+    ParseInt(ParseIntError),
     AuthzBadRequest,
     AuthzMissingClientId,
     AuthzUnknownClient,
     AuthzRedirectUrlNotRegistered,
     AuthzGrantTypeMissing,
     AuthzClientIdMismatch,
+    AuthzGrantNotFound,
     ClientCodeMissing,
     ClientStateMissing,
     ClientNonceMismatch,
@@ -37,6 +40,7 @@ impl<E: UserError> fmt::Display for OAuthError<E> {
             OAuthError::FromUtf8Error(ref e) => e.fmt(f),
             OAuthError::Url(ref e) => e.fmt(f),
             OAuthError::Io(ref e) => e.fmt(f),
+            OAuthError::ParseInt(ref e) => e.fmt(f),
             OAuthError::UserError(ref e) => fmt::Display::fmt(e,f),
             ref e => write!(f, "{}", e.description()),
         }
@@ -50,12 +54,14 @@ impl<E: UserError> StdError for OAuthError<E> {
             OAuthError::FromUtf8Error(ref e) => e.description(),
             OAuthError::Url(ref e) => e.description(),
             OAuthError::Io(ref e) => e.description(),
+            OAuthError::ParseInt(ref e) => e.description(),
             OAuthError::AuthzBadRequest => "Bad Request",
             OAuthError::AuthzMissingClientId => "Missing `client_id`",
             OAuthError::AuthzUnknownClient => "Unknown Client",
             OAuthError::AuthzRedirectUrlNotRegistered => "`redirect_url` Not Registered",
             OAuthError::AuthzGrantTypeMissing => "`grant_type` Missing",
             OAuthError::AuthzClientIdMismatch => "`client_id` mismatch",
+            OAuthError::AuthzGrantNotFound => "grant not found",
             OAuthError::ClientCodeMissing => "`code` Missing",
             OAuthError::ClientStateMissing => "`state` Missing",
             OAuthError::ClientNonceMismatch => "`nonce` Mismatch",
@@ -70,6 +76,7 @@ impl<E: UserError> StdError for OAuthError<E> {
             OAuthError::FromUtf8Error(ref e) => Some(e),
             OAuthError::Url(ref e) => Some(e),
             OAuthError::Io(ref e) => Some(e),
+            OAuthError::ParseInt(ref e) => Some(e),
             OAuthError::UserError(ref e) => Some(e),
             _ => None,
         }
@@ -97,6 +104,12 @@ impl<E: UserError> From<::url::ParseError> for OAuthError<E> {
 impl<E: UserError> From<IoError> for OAuthError<E> {
     fn from(e: IoError) -> OAuthError<E> {
         OAuthError::Io(e)
+    }
+}
+
+impl<E: UserError> From<ParseIntError> for OAuthError<E> {
+    fn from(e: ParseIntError) -> OAuthError<E> {
+        OAuthError::ParseInt(e)
     }
 }
 
