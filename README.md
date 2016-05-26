@@ -1,4 +1,4 @@
-# rust-oauth2
+# oauth2-lib
 
 <a href="http://mikedilger.github.io/rust-oauth2">Documentation</a>
 
