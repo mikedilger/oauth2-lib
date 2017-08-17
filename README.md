@@ -1,6 +1,6 @@
 # oauth2-lib
 
-<a href="http://mikedilger.github.io/rust-oauth2">Documentation</a>
+<a href="http://mikedilger.github.io/oauth2-lib">Documentation</a>
 
 This is an OAuth 2.0 library for the Rust language.  It defines types and
 traits useful for implementing an OAuth 2.0 compliant system as specified by
